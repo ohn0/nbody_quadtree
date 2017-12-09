@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1512850341 source:c:\users\neel\codeblocks\quadtree\main.cpp
+	"quadtree.h"
+	<iostream>
+
+1512856886 c:\users\neel\codeblocks\quadtree\quadtree.h
+
+1512855350 source:c:\users\neel\codeblocks\quadtree\quadtree.cpp
+	"quadtree.h"
+
+1512850213 source:c:\users\neel\codeblocks\quadtree\test.c
+
+1512856461 source:c:\users\neel\codeblocks\quadtree\quadtests.cpp
+	"quadtree.h"
+	<iostream>
+
