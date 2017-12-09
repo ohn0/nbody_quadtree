@@ -1,5 +1,6 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
+#include <iostream>
 #define NULL 0
 struct quadNode
 {
@@ -17,7 +18,7 @@ class quadtree
         quadtree();
         quadtree(int,int,int,int);
         T* getValue();
-        const quadtree* getQuads();
+        quadtree<T>** getQuads();
         int insertElement(T*);
         virtual ~quadtree();
 
@@ -25,10 +26,11 @@ class quadtree
     protected:
 
     private:
-        quadtree<T>* NW;
-        quadtree<T>* NE;
-        quadtree<T>* SW;
-        quadtree<T>* SE;
+        quadtree<T>* NW = nullptr;
+        quadtree<T>* NE = nullptr;
+        quadtree<T>* SW = nullptr;
+        quadtree<T>* SE = nullptr;
+        quadtree<T>* findValidQuadrant(double, double);
         int subdivide();
         quadtree<T>* quads[4] = {NW, NE, SW, SE};
 
@@ -51,11 +53,14 @@ template <typename T> quadtree<T>::quadtree(int startX, int startY, int sizeX, i
 
 template <class T> quadtree<T>::~quadtree()
 {
-    //dtor
+    delete NW;
+    delete NE;
+    delete SW;
+    delete SE;
 }
 
 
-template <class T> const quadtree<T>* quadtree<T>::getQuads()
+template <class T> quadtree<T>** quadtree<T>::getQuads()
 {
     return this->quads;
 }
@@ -70,7 +75,7 @@ template <class T> int quadtree<T>::insertElement(T* element)
     /*
 
     */
-    if(this->value != NULL){
+    if(this->value != nullptr){
         this->subdivide();
         return 0;
     }else{
@@ -82,10 +87,24 @@ template <class T> int quadtree<T>::insertElement(T* element)
 
 template <class T> int quadtree<T>::subdivide()
 {
-    int i;
-    for(i = 0; i < 4; i++){
-        this->quads[i] = new quadtree<T>();
+    this->NW = new quadtree<T>(this->startX, this->startY,
+                               this->startX/2, this->startY/2);
+    this->NE = new quadtree<T>(this->startX/2, this->startY,
+                               this->startX/2, this->startY/2);
+    this->SW = new quadtree<T>(this->startX, this->startY/2,
+                               this->startX/2, this->startY/2);
+    this->SE = new quadtree<T>(this->startX/2, this->startY/2,
+                               this->startX/2, this->startY/2);
+}
+
+template <class T> quadtree<T>* quadtree<T>::findValidQuadrant(double X, double Y)
+{
+    if(NW == NULL && NE == NULL &&
+       SW == NULL && SE == NULL){
+        std::cout << "Quadrants not initialized." << std::endl;
+        return NULL;
     }
+    return NULL;
 }
 
 #endif // QUADTREE_H
