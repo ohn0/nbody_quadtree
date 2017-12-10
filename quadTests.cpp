@@ -24,6 +24,7 @@ bool insertIntoQuad()
         std::cout << "Inserted into quadtree but value is not in quadtree." << std::endl;
         return false;
     }
+    std::cout << "insertIntoQuad PASSED" << std::endl;
     return true;
 }
 
@@ -40,6 +41,7 @@ bool insertIntoQuadFailsWhenElementExists()
                   " a child of the root." << std::endl;
         return false;
     }
+    std::cout << "insertIntoQuadFailsWhenElementExists PASSED" << std::endl;
     return true;
 }
 
@@ -58,6 +60,7 @@ bool validQuadrantIsNotNULL()
             return false;
         }
     }
+    std::cout << "validQuadrantIsNotNULL PASSED" << std::endl;
     return true;
 }
 

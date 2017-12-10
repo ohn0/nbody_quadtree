@@ -1,7 +1,6 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 #include <iostream>
-#define NULL 0
 struct quadNode
 {
     double massOfChildren;
@@ -13,6 +12,7 @@ class quadtree
 {
     int sizeX, startX;
     int sizeY, startY;
+    bool isExternal;
     T* value;
     public:
         quadtree();
@@ -26,10 +26,10 @@ class quadtree
     protected:
 
     private:
-        quadtree<T>* NW = nullptr;
-        quadtree<T>* NE = nullptr;
-        quadtree<T>* SW = nullptr;
-        quadtree<T>* SE = nullptr;
+        quadtree<T>* NW;
+        quadtree<T>* NE;
+        quadtree<T>* SW;
+        quadtree<T>* SE;
         quadtree<T>* findValidQuadrant(double, double);
         int subdivide();
         quadtree<T>* quads[4] = {NW, NE, SW, SE};
@@ -39,11 +39,13 @@ class quadtree
 
 template <typename T> quadtree<T>::quadtree()
 {
+    this->isExternal = true;
     this->value = NULL;
 }
 
 template <typename T> quadtree<T>::quadtree(int startX, int startY, int sizeX, int sizeY)
 {
+    this->isExternal = true;
     this->sizeX = sizeX;
     this->sizeY = sizeY;
     this->startX = startX;
@@ -53,10 +55,12 @@ template <typename T> quadtree<T>::quadtree(int startX, int startY, int sizeX, i
 
 template <class T> quadtree<T>::~quadtree()
 {
-    delete NW;
-    delete NE;
-    delete SW;
-    delete SE;
+    if(!this->isExternal){
+        delete NW;
+        delete NE;
+        delete SW;
+        delete SE;
+    }
 }
 
 
@@ -77,6 +81,7 @@ template <class T> int quadtree<T>::insertElement(T* element)
     */
     if(this->value != nullptr){
         this->subdivide();
+        this->isExternal = false;
         return 0;
     }else{
         this->value = element;
@@ -95,16 +100,17 @@ template <class T> int quadtree<T>::subdivide()
                                this->startX/2, this->startY/2);
     this->SE = new quadtree<T>(this->startX/2, this->startY/2,
                                this->startX/2, this->startY/2);
+    return 0;
+
 }
 
 template <class T> quadtree<T>* quadtree<T>::findValidQuadrant(double X, double Y)
 {
-    if(NW == NULL && NE == NULL &&
-       SW == NULL && SE == NULL){
+    if(this->isExternal){
         std::cout << "Quadrants not initialized." << std::endl;
-        return NULL;
+        return nullptr;
     }
-    return NULL;
+    return nullptr;
 }
 
 #endif // QUADTREE_H
