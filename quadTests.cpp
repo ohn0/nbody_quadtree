@@ -3,10 +3,12 @@
 bool insertIntoQuad();
 bool insertIntoQuadFailsWhenElementExists();
 bool validQuadrantIsNotNULL();
+bool validQuadrantIsFound();
 
 int main(int argc, char** argv)
 {
-    if(insertIntoQuad() && insertIntoQuadFailsWhenElementExists() && validQuadrantIsNotNULL()){
+    if(insertIntoQuad() && insertIntoQuadFailsWhenElementExists()
+       && validQuadrantIsNotNULL() && validQuadrantIsFound()){
         std::cout << "All tests passed!" << std::endl;
         return 0;
     }else{
@@ -19,7 +21,7 @@ bool insertIntoQuad()
 {
     quadtree<quadNode> Q(0,0, 100, 100);
     quadNode Qnode;
-    Q.insertElement(&Qnode);
+    Q.insertElement(&Qnode, 10.f, 10.f);
     if(Q.getValue() == NULL){
         std::cout << "Inserted into quadtree but value is not in quadtree." << std::endl;
         return false;
@@ -34,8 +36,8 @@ bool insertIntoQuadFailsWhenElementExists()
     quadNode node;
     quadNode* nodeAddr;
     quadNode nodeB;
-    Q.insertElement(&node);
-    Q.insertElement(&nodeB);
+    Q.insertElement(&node, 10.f, 10.f);
+    Q.insertElement(&nodeB, 10.f, 10.f);
     if(&nodeB == Q.getValue()){
         std::cout << "New element that was inserted into the quadtree is in the root, it should be" <<
                   " a child of the root." << std::endl;
@@ -50,8 +52,8 @@ bool validQuadrantIsNotNULL()
     quadtree<quadNode> Q(0, 0, 100, 100);
     quadNode node;
     quadNode nodeB;
-    Q.insertElement(&node);
-    Q.insertElement(&nodeB);
+    Q.insertElement(&node, 10.f, 10.f);
+    Q.insertElement(&nodeB, 10.f, 10.f);
     quadtree<quadNode>** quadNodes = Q.getQuads();
     int i;
     for(i = 0; i < 4; i++){
@@ -62,6 +64,24 @@ bool validQuadrantIsNotNULL()
     }
     std::cout << "validQuadrantIsNotNULL PASSED" << std::endl;
     return true;
+}
+
+bool validQuadrantIsFound()
+{
+    quadtree<quadNode> Q(0,0, 100, 100);
+    quadNode node;
+    quadNode nodeB;
+    Q.insertElement(&node, 10.f, 10.f);
+    Q.insertElement(&nodeB,10.f, 10.f);
+
+    if(Q.getValue() == nullptr){
+        std::cout << "validQuadrantIsFound PASSED" << std::endl;
+    }
+
+    std::cout << "Root's element did not get inserted into one of it's" <<
+                 " children." << std::endl;
+    return false;
+
 }
 
 

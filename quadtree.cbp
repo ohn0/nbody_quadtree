@@ -30,9 +30,13 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="main.cpp">
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="quadTests.cpp" />
 		<Unit filename="quadtree.cpp" />
 		<Unit filename="quadtree.h" />
 		<Unit filename="test.c">
