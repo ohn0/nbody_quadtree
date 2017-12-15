@@ -37,7 +37,7 @@ bool insertIntoQuadFailsWhenElementExists()
     quadNode* nodeAddr;
     quadNode nodeB;
     Q.insertElement(&node, 10.f, 10.f);
-    Q.insertElement(&nodeB, 10.f, 10.f);
+    Q.insertElement(&nodeB, 21.f, 40.f);
     if(&nodeB == Q.getValue()){
         std::cout << "New element that was inserted into the quadtree is in the root, it should be" <<
                   " a child of the root." << std::endl;
@@ -53,7 +53,7 @@ bool validQuadrantIsNotNULL()
     quadNode node;
     quadNode nodeB;
     Q.insertElement(&node, 10.f, 10.f);
-    Q.insertElement(&nodeB, 10.f, 10.f);
+    Q.insertElement(&nodeB, 21.f, 40.f);
     quadtree<quadNode>** quadNodes = Q.getQuads();
     int i;
     for(i = 0; i < 4; i++){
@@ -72,7 +72,7 @@ bool validQuadrantIsFound()
     quadNode node;
     quadNode nodeB;
     Q.insertElement(&node, 10.f, 10.f);
-    Q.insertElement(&nodeB,10.f, 10.f);
+    Q.insertElement(&nodeB,11.f, 10.f);
 
     if(Q.getValue() == nullptr){
         std::cout << "validQuadrantIsFound PASSED" << std::endl;

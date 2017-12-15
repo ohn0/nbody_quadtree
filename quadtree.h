@@ -1,6 +1,7 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 #include <iostream>
+#include <cstdio>
 struct quadNode
 {
     double massOfChildren;
@@ -111,13 +112,13 @@ template <class T> int quadtree<T>::subdivide()
     Subdivides the calling quadtree into 4 quadtrees.
     */
     this->quads[0] = new quadtree<T>(this->startX, this->startY,
-                               this->startX/2, this->startY/2);
+                               this->sizeX/2, this->sizeY/2);
     this->quads[1] = new quadtree<T>(this->startX/2, this->startY,
-                               this->startX/2, this->startY/2);
+                               this->sizeX/2, this->sizeY/2);
     this->quads[2] = new quadtree<T>(this->startX, this->startY/2,
-                               this->startX/2, this->startY/2);
+                               this->sizeX/2, this->sizeY/2);
     this->quads[3] = new quadtree<T>(this->startX/2, this->startY/2,
-                               this->startX/2, this->startY/2);
+                               this->sizeX/2, this->sizeY/2);
     return 0;
 
 }
@@ -133,11 +134,18 @@ template <class T> quadtree<T>* quadtree<T>::findValidQuadrant(double X, double 
     }
 
     int i;
+    printf("Finding a valid quadrant for (%f,%f)\n", X,Y);
     for(i = 0; i < 4; i++){
+        printf("Start:(%d,%d)\nSize:(%d,%d)\n", this->quads[i]->startX,
+               this->quads[i]->startY, this->quads[i]->sizeX, this->quads[i]->sizeY);
         if(this->quads[i]->startX < X &&
           (this->quads[i]->startX + this->quads[i]->sizeX > X) &&
            this->quads[i]->startY < Y &&
           (this->quads[i]->startY + this->quads[i]->sizeY > Y)){
+                std::cout << "Found a valid quadrant starting at (" <<
+                this->quads[i]->startX <<","<<this->quads[i]->startY <<") " <<
+                "with size (" << this->quads[i]->sizeX <<"," << this->quads[i]->sizeY<<
+                ") that will contain the point(" << X << "," << Y <<")"<< std::endl;
                 return this->quads[i];
            }
     }
