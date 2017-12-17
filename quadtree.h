@@ -2,6 +2,12 @@
 #define QUADTREE_H
 #include <iostream>
 #include <cstdio>
+#define NW 0
+#define NE 1
+#define SW 2
+#define SE 3
+#define MINIMUM_QUADRANT_X 2
+#define MINIMUM_QUADRANT_Y 2
 struct quadNode
 {
     double massOfChildren;
@@ -28,10 +34,6 @@ class quadtree
     protected:
 
     private:
-        quadtree<T>* NW;
-        quadtree<T>* NE;
-        quadtree<T>* SW;
-        quadtree<T>* SE;
         quadtree<T>* findValidQuadrant(double, double);
         int subdivide();
         /*
@@ -51,13 +53,14 @@ template <typename T> quadtree<T>::quadtree()
     this->value = NULL;
 }
 
-template <typename T> quadtree<T>::quadtree(int startX, int startY, int sizeX, int sizeY)
+template <typename T> quadtree<T>::quadtree(int stX, int stY, int szX, int szY)
 {
+    printf("Creating a quadrant with size (%d, %d) at location (%d, %d)\n", szX, szY, stX, stY);
     this->isExternal = true;
-    this->sizeX = sizeX;
-    this->sizeY = sizeY;
-    this->startX = startX;
-    this->startY = startY;
+    this->sizeX = szX;
+    this->sizeY = szY;
+    this->startX = stX;
+    this->startY = stY;
     this->value = NULL;
     X = Y = 0.f;
 }
@@ -111,13 +114,13 @@ template <class T> int quadtree<T>::subdivide()
     /*
     Subdivides the calling quadtree into 4 quadtrees.
     */
-    this->quads[0] = new quadtree<T>(this->startX, this->startY,
+    this->quads[NW] = new quadtree<T>(this->startX , this->startY,
                                this->sizeX/2, this->sizeY/2);
-    this->quads[1] = new quadtree<T>(this->startX/2, this->startY,
+    this->quads[NE] = new quadtree<T>(this->startX + this->sizeX/2, this->startY,
                                this->sizeX/2, this->sizeY/2);
-    this->quads[2] = new quadtree<T>(this->startX, this->startY/2,
+    this->quads[SW] = new quadtree<T>(this->startX, this->startY + this->sizeY/2,
                                this->sizeX/2, this->sizeY/2);
-    this->quads[3] = new quadtree<T>(this->startX/2, this->startY/2,
+    this->quads[SE] = new quadtree<T>(this->startX + this->sizeX/2, this->startY+this->sizeY/2,
                                this->sizeX/2, this->sizeY/2);
     return 0;
 
@@ -138,10 +141,10 @@ template <class T> quadtree<T>* quadtree<T>::findValidQuadrant(double X, double 
     for(i = 0; i < 4; i++){
         printf("Start:(%d,%d)\nSize:(%d,%d)\n", this->quads[i]->startX,
                this->quads[i]->startY, this->quads[i]->sizeX, this->quads[i]->sizeY);
-        if(this->quads[i]->startX < X &&
-          (this->quads[i]->startX + this->quads[i]->sizeX > X) &&
-           this->quads[i]->startY < Y &&
-          (this->quads[i]->startY + this->quads[i]->sizeY > Y)){
+        if(this->quads[i]->startX <= X &&
+          (this->quads[i]->startX + this->quads[i]->sizeX >= X) &&
+           this->quads[i]->startY <= Y &&
+          (this->quads[i]->startY + this->quads[i]->sizeY >= Y)){
                 std::cout << "Found a valid quadrant starting at (" <<
                 this->quads[i]->startX <<","<<this->quads[i]->startY <<") " <<
                 "with size (" << this->quads[i]->sizeX <<"," << this->quads[i]->sizeY<<
