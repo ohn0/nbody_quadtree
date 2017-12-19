@@ -27,7 +27,15 @@ class quadtree
         quadtree(int,int,int,int);
         T* getValue();
         quadtree<T>** getQuads();
+        bool isExternalNode(){return isExternal;}
+        int getstX(){return startX;}
+        int getstY(){return startY;}
+        int getsX(){return sizeX;}
+        int getsY(){return sizeY;}
+        double getX(){return X;}
+        double getY(){return Y;}
         int insertElement(T*, double, double);
+        void summary();
         virtual ~quadtree();
 
 
@@ -91,6 +99,11 @@ template <class T> int quadtree<T>::insertElement(T* element, double X, double Y
     /*
 
     */
+    if(X > this->sizeX || Y > this->sizeY){
+        printf("Element location (%f, %f) is out of bounds. Unable to insert.\n", X, Y);
+        return -1;
+    }
+    printf("Inserting (%f, %f)\n", X, Y);
     if(this->value != nullptr){
         this->subdivide();
         this->isExternal = false;
@@ -101,11 +114,16 @@ template <class T> int quadtree<T>::insertElement(T* element, double X, double Y
         validQuad->insertElement(element, X, Y);
         return 0;
     }else{
+        if(!this->isExternal){
+            (this->findValidQuadrant(X, Y))->insertElement(element, X, Y);
+            return 0;
+        }
         this->value = element;
         this->X = X;
         this->Y = Y;
         return 0;
     }
+    printf("Couldn't insert(%f, %f) ):\n", X, Y);
     return -1;
 }
 
@@ -123,6 +141,11 @@ template <class T> int quadtree<T>::subdivide()
     this->quads[SE] = new quadtree<T>(this->startX + this->sizeX/2, this->startY+this->sizeY/2,
                                this->sizeX/2, this->sizeY/2);
     return 0;
+
+}
+
+template <class T> void quadtree<T>::summary()
+{
 
 }
 

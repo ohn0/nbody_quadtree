@@ -4,11 +4,13 @@ bool insertIntoQuad();
 bool insertIntoQuadFailsWhenElementExists();
 bool validQuadrantIsNotNULL();
 bool validQuadrantIsFound();
+bool outOfBoundElementShouldNotInsert();
 
 int main(int argc, char** argv)
 {
     if(insertIntoQuad() && insertIntoQuadFailsWhenElementExists()
-       && validQuadrantIsNotNULL() && validQuadrantIsFound()){
+       && validQuadrantIsNotNULL() && validQuadrantIsFound()
+       && outOfBoundElementShouldNotInsert()){
         std::cout << "------------------All tests passed!------------------" << std::endl;
         return 0;
     }else{
@@ -53,6 +55,7 @@ bool validQuadrantIsNotNULL()
     quadNode nodeB;
     Q.insertElement(&node, 10.f, 10.f);
     Q.insertElement(&nodeB, 21.f, 40.f);
+    Q.insertElement(new quadNode, 43, 67);
     quadtree<quadNode>** quadNodes = Q.getQuads();
     int i;
     for(i = 0; i < 4; i++){
@@ -81,7 +84,19 @@ bool validQuadrantIsFound()
     std::cout << "Root's element did not get inserted into one of it's" <<
                  " children." << std::endl;
     return false;
+}
 
+bool outOfBoundElementShouldNotInsert()
+{
+    quadtree<quadNode> Q(0,0, 100,100);
+    int insertReturn = Q.insertElement(new quadNode, 101, 101);
+    if(insertReturn == -1){
+        std::cout << "outOfBoundElementShouldNotInsert PASSED" << std::endl;
+        return true;
+    }
+
+    std::cout << "outOfBoundElementShouldNotInsert FAILED" << std::endl;
+    return false;
 }
 
 
