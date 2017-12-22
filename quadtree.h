@@ -2,6 +2,7 @@
 #define QUADTREE_H
 #include <iostream>
 #include <cstdio>
+#include <cmath>
 #define NW 0
 #define NE 1
 #define SW 2
@@ -34,6 +35,8 @@ class quadtree
         int getsY(){return sizeY;}
         double getX(){return X;}
         double getY(){return Y;}
+        quadtree<T>** findNode(int, int);
+        int deleteNode(int, int);
         int insertElement(T*, double, double);
         void summary();
         virtual ~quadtree();
@@ -94,15 +97,43 @@ template <class T> T* quadtree<T>::getValue()
     return this->value;
 }
 
+template <typename T> int quadtree<T>::deleteNode(int X, int Y)
+{
+    quadtree<T>** nodeToDeleteAddr = (this->findNode(X,Y)) ;
+    if(nodeToDeleteAddr == nullptr){
+        return -1;
+    }
+    printf("About to delete node at address %p\n", nodeToDeleteAddr);
+    (*nodeToDeleteAddr)->value = nullptr;
+    (*nodeToDeleteAddr)->X =0.f;
+    (*nodeToDeleteAddr)->Y =0.f;
+    return 0;
+}
+
+template <typename T> quadtree<T>** quadtree<T>::findNode(int X, int Y)
+{
+    if(this->X != X && this->Y != Y && this->isExternal){return nullptr;}
+    if(this->isExternal){return nullptr;}
+
+    for(int i = 0; i < 4; i++){
+        if(this->quads[i]->startX + this->quads[i]->sizeX >= X &&
+           this->quads[i]->startX <= X &&
+           this->quads[i]->startY + this->quads[i]->sizeY >= Y &&
+           this->quads[i]->startY <= Y){
+            if(this->quads[i]->X == X && this->quads[i]->Y == Y && this->quads[i]->isExternal){
+                return &(this->quads[i]);
+            }
+            return this->quads[i]->findNode(X,Y);
+       }
+    }
+}
+
 template <class T> int quadtree<T>::insertElement(T* element, double X, double Y)
 {
     /*
 
     */
-    if(X > this->sizeX || Y > this->sizeY){
-        printf("Element location (%f, %f) is out of bounds. Unable to insert.\n", X, Y);
-        return -1;
-    }
+
     printf("Inserting (%f, %f)\n", X, Y);
     if(this->value != nullptr){
         this->subdivide();

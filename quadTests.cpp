@@ -4,13 +4,16 @@ bool insertIntoQuad();
 bool insertIntoQuadFailsWhenElementExists();
 bool validQuadrantIsNotNULL();
 bool validQuadrantIsFound();
-bool outOfBoundElementShouldNotInsert();
-
+bool existingElementIsDeleted();
+bool existingElementIsFound();
+bool nonexistentElementNotFound();
+bool deletingNonExistentElementDoesNothing();
 int main(int argc, char** argv)
 {
     if(insertIntoQuad() && insertIntoQuadFailsWhenElementExists()
        && validQuadrantIsNotNULL() && validQuadrantIsFound()
-       && outOfBoundElementShouldNotInsert()){
+       && existingElementIsFound() && nonexistentElementNotFound()
+       && existingElementIsDeleted() && deletingNonExistentElementDoesNothing()){
         std::cout << "------------------All tests passed!------------------" << std::endl;
         return 0;
     }else{
@@ -86,17 +89,84 @@ bool validQuadrantIsFound()
     return false;
 }
 
-bool outOfBoundElementShouldNotInsert()
+bool existingElementIsDeleted()
 {
-    quadtree<quadNode> Q(0,0, 100,100);
-    int insertReturn = Q.insertElement(new quadNode, 101, 101);
-    if(insertReturn == -1){
-        std::cout << "outOfBoundElementShouldNotInsert PASSED" << std::endl;
-        return true;
+    quadtree<quadNode> Q(0,0, 100, 100);
+    quadNode A,B,C,D;
+    Q.insertElement(&A, 77,21);
+    Q.insertElement(&B, 37,84);
+    Q.insertElement(&C, 67,92);
+    Q.insertElement(&D, 12,9);
+
+    int deleteResult = Q.deleteNode(77,21);
+    if(deleteResult == -1){
+        std::cout << "Unable to delete element." << std::endl;
+        return false;
     }
 
-    std::cout << "outOfBoundElementShouldNotInsert FAILED" << std::endl;
-    return false;
+    quadtree<quadNode>** foundNode = Q.findNode(77, 21);
+    if(foundNode != nullptr){
+        printf("%p, %p", *foundNode, &A);
+        std::cout << "Node that was deleted still exists in quadtree." << std::endl;
+        return false;
+    }
+
+    std::cout << "existingElementIsDeleted PASSED" << std::endl;
+    return true;
+}
+
+bool deletingNonExistentElementDoesNothing()
+{
+    quadtree<quadNode> Q(0,0,100,100);
+    quadNode A, B;
+    if(Q.deleteNode(12,12) != -1){
+        std::cout << "Quadtree tried to delete something from an empty quadtree." << std::endl;
+        return false;
+    }
+    Q.insertElement(&A, 12,12);
+    Q.insertElement(&B, 66,87);
+    if(Q.deleteNode(23,23) != -1){
+        std::cout << "Quadtree tried to delete an element that doesn't exist in the quadtree." << std::endl;
+        return false;
+    }
+
+    if(Q.deleteNode(12,2) != -1 && Q.deleteNode(66,87) == -1 && Q.deleteNode(0,3) != -1){
+        std::cout << "Series of deletions messed up the quadtree." << std::endl;
+        return false;
+    }
+    std::cout << "deletingNonExistentElementDoesNothing PASSED" << std::endl;
+    return true;
+}
+
+bool existingElementIsFound()
+{
+    quadtree<quadNode> Q(0,0,100,100);
+    quadNode A,B;
+    Q.insertElement(&A, 12, 44);
+    Q.insertElement(&B, 66, 89);
+    quadtree<quadNode>* node = *(Q.findNode(12, 44));
+    if(node == nullptr){
+        std::cout << "Unable to find node that was just inserted." << std::endl;
+        return false;
+    }
+
+    std::cout << "existingElementIsFound PASSED" << std::endl;
+    return true;
+}
+
+bool nonexistentElementNotFound()
+{
+    quadtree<quadNode> Q(0,0,100,100);
+    quadNode A,B;
+    Q.insertElement(&A, 12, 44);
+    Q.insertElement(&B, 42, 23);
+    quadtree<quadNode>** node = (Q.findNode(32,44));
+    if(node != nullptr){
+        std::cout << "Node that doesn't exist in quadtree found in quadtree." << std::endl;
+        return false;
+    }
+    std::cout << "nonexistentElementNotFound PASSED" << std::endl;
+    return true;
 }
 
 

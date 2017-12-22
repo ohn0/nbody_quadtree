@@ -3,16 +3,17 @@
 	"quadtree.h"
 	<iostream>
 
-1513645374 c:\users\neel\codeblocks\quadtree\quadtree.h
+1513977422 c:\users\neel\codeblocks\quadtree\quadtree.h
 	<iostream>
 	<cstdio>
+	<cmath>
 
 1512855350 source:c:\users\neel\codeblocks\quadtree\quadtree.cpp
 	"quadtree.h"
 
 1512850213 source:c:\users\neel\codeblocks\quadtree\test.c
 
-1513645519 source:c:\users\neel\codeblocks\quadtree\quadtests.cpp
+1513976633 source:c:\users\neel\codeblocks\quadtree\quadtests.cpp
 	"quadtree.h"
 	<iostream>
 
