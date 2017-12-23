@@ -115,7 +115,8 @@ bool existingElementIsDeleted()
     return true;
 }
 
-bool deletingNonExistentElementDoesNothing()
+bool deletingNonExistentElementDoesNothing()    Q.deleteNode()
+
 {
     quadtree<quadNode> Q(0,0,100,100);
     quadNode A, B;

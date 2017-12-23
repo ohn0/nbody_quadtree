@@ -15,6 +15,7 @@ struct quadNode
     double centerOfMassX;
     double centerOfMassY;
 };
+
 template <typename T>
 class quadtree
 {
@@ -56,6 +57,10 @@ class quadtree
         quadtree<T>* quads[4];
 
 };
+
+double calculateMassOfChildren(quadtree<quadNode>*);
+double calculateCenterOfMassX(quadtree<quadNode>*);
+double calculateCenterOfMassY(quadtree<quadNode>*);
 
 
 template <typename T> quadtree<T>::quadtree()
