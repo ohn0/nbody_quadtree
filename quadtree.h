@@ -9,12 +9,6 @@
 #define SE 3
 #define MINIMUM_QUADRANT_X 2
 #define MINIMUM_QUADRANT_Y 2
-struct quadNode
-{
-    double massOfChildren;
-    double centerOfMassX;
-    double centerOfMassY;
-};
 
 template <typename T>
 class quadtree
@@ -23,6 +17,7 @@ class quadtree
     double X, Y;
     int sizeY, startY;
     bool isExternal;
+    int occupiedQuadrants;
     T* value;
     public:
         quadtree();
@@ -58,11 +53,6 @@ class quadtree
 
 };
 
-double calculateMassOfChildren(quadtree<quadNode>*);
-double calculateCenterOfMassX(quadtree<quadNode>*);
-double calculateCenterOfMassY(quadtree<quadNode>*);
-
-
 template <typename T> quadtree<T>::quadtree()
 {
     this->isExternal = true;
@@ -78,6 +68,7 @@ template <typename T> quadtree<T>::quadtree(int stX, int stY, int szX, int szY)
     this->startX = stX;
     this->startY = stY;
     this->value = NULL;
+    this->occupiedQuadrants = 0;
     X = Y = 0.f;
 }
 
@@ -131,6 +122,7 @@ template <typename T> quadtree<T>** quadtree<T>::findNode(int X, int Y)
             return this->quads[i]->findNode(X,Y);
        }
     }
+    return nullptr;
 }
 
 template <class T> int quadtree<T>::insertElement(T* element, double X, double Y)

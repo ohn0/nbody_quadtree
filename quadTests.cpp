@@ -1,4 +1,5 @@
 #include "quadtree.h"
+#include "nBody.h"
 #include <iostream>
 bool insertIntoQuad();
 bool insertIntoQuadFailsWhenElementExists();
@@ -115,8 +116,7 @@ bool existingElementIsDeleted()
     return true;
 }
 
-bool deletingNonExistentElementDoesNothing()    Q.deleteNode()
-
+bool deletingNonExistentElementDoesNothing()
 {
     quadtree<quadNode> Q(0,0,100,100);
     quadNode A, B;
