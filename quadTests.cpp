@@ -1,6 +1,7 @@
 #include "quadtree.h"
 #include "nBody.h"
 #include <iostream>
+bool testQuadTree();
 bool insertIntoQuad();
 bool insertIntoQuadFailsWhenElementExists();
 bool validQuadrantIsNotNULL();
@@ -11,17 +12,32 @@ bool nonexistentElementNotFound();
 bool deletingNonExistentElementDoesNothing();
 int main(int argc, char** argv)
 {
+    if(testQuadTree()){
+        std::cout << "------------------ALL tests passed!------------------" << std::endl;
+        return 0;
+    }else{
+        std::cout << "------------------Some tests failed. :(------------------" << std::endl;
+        return -1;
+    }
+
+
+}
+
+bool testQuadTree()
+{
     if(insertIntoQuad() && insertIntoQuadFailsWhenElementExists()
        && validQuadrantIsNotNULL() && validQuadrantIsFound()
        && existingElementIsFound() && nonexistentElementNotFound()
        && existingElementIsDeleted() && deletingNonExistentElementDoesNothing()){
-        std::cout << "------------------All tests passed!------------------" << std::endl;
-        return 0;
+        std::cout << "------------------All quadtree tests passed!------------------" << std::endl;
+        return true;
     }else{
         std::cout << "Test(s) failed." << std::endl;
-        return -1;
+        return false;
     }
 }
+
+
 
 bool insertIntoQuad()
 {

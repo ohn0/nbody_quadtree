@@ -9,12 +9,13 @@ struct particle{
     int xPos;
     int yPos;
 
-    float xVelocity;
-    float yVelocity;
+    double xVelocity;
+    double yVelocity;
 
-    float xAccel;
-    float yAccel;
+    double xAccel;
+    double yAccel;
 
+    double mass;
 };
 
 #ifndef QUAD_NODE_STRUCT_H
@@ -24,7 +25,7 @@ struct quadNode
     double massOfChildren;
     double centerOfMassX;
     double centerOfMassY;
-    particle* P;
+    particle* particleNode;
 };
 #endif // QUAD_NODE_STRUCT_H
 
@@ -41,6 +42,7 @@ class nBody
         nBody(std::string);
         nBody(particle*);
         void setThreshold(double threshold){calculationThreshold = threshold;}
+
         virtual ~nBody();
 
     protected:
