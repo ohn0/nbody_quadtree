@@ -8,6 +8,44 @@ nBody::nBody()
 nBody::~nBody()
 {
     //dtor
+    delete[] particles;
+}
+
+nBody::nBody(std::string filename)
+{
+    /*
+    file format:
+    line 0:numberOfParticles
+    line 1:                 xPosition yPosition xVelocity yVelocity xAcceleration yAcceleration mass
+    .
+    .
+    .
+    line numberOfParcticles:xPosition yPosition xVelocity yVelocity xAcceleration yAcceleration mass
+    */
+
+    std::ifstream particleFile(filename);
+    if(!particleFile.is_open()){
+        printf("Error opening %s.\n", filename.c_str());
+    }
+    else{
+        particleFile >> numParticles;
+        this->particles = new particle[numParticles];
+        int i = 0;
+        while(!particleFile.eof()){
+    //        particles[i] = new particle;
+            particleFile >> particles[i].xPos;
+            particleFile >> particles[i].yPos;
+
+            particleFile >> particles[i].xVelocity;
+            particleFile >> particles[i].yVelocity;
+
+            particleFile >> particles[i].xAccel;
+            particleFile >> particles[i].yAccel;
+
+            particleFile >> particles[i].mass;
+            i++;
+        }
+    }
 }
 
 double calculateMassOfChildren(quadtree<quadNode>* Q)

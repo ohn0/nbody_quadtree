@@ -2,6 +2,7 @@
 #include "nBody.h"
 #include <iostream>
 bool testQuadTree();
+bool testNBody();
 bool insertIntoQuad();
 bool insertIntoQuadFailsWhenElementExists();
 bool validQuadrantIsNotNULL();
@@ -10,9 +11,11 @@ bool existingElementIsDeleted();
 bool existingElementIsFound();
 bool nonexistentElementNotFound();
 bool deletingNonExistentElementDoesNothing();
+bool nBodyFileNameConstructorWorks();
+
 int main(int argc, char** argv)
 {
-    if(testQuadTree()){
+    if(testQuadTree() && testNBody()){
         std::cout << "------------------ALL tests passed!------------------" << std::endl;
         return 0;
     }else{
@@ -32,11 +35,22 @@ bool testQuadTree()
         std::cout << "------------------All quadtree tests passed!------------------" << std::endl;
         return true;
     }else{
-        std::cout << "Test(s) failed." << std::endl;
+        std::cout << "Quadtree Test(s) failed." << std::endl;
         return false;
     }
 }
 
+
+bool testNBody()
+{
+    if(nBodyFileNameConstructorWorks()){
+        std::cout << "------------------All NBody tests passed!------------------" << std::endl;
+        return true;
+    }else{
+        std::cout << "NBody tests failed." << std::endl;
+        return false;
+    }
+}
 
 
 bool insertIntoQuad()
@@ -186,4 +200,36 @@ bool nonexistentElementNotFound()
     return true;
 }
 
+bool nBodyFileNameConstructorWorks()
+{
+    /*
+    Sample file
+    3
+    23 28 72 12 33 44 5
+    3 21 55 78 13 48 58
+    83 19 64 56 19 32 99
+    */
+    nBody nSystem("particles");
+    nSystem.getParticles();
+    if(nSystem.getParticleNum() != 3){
+        std::cout << "nBody obtained wrong number of particles." << std::endl;
+    }
+    const particle* particles = nSystem.getParticles();
+    particle p0 = particles[0];
+    particle p1 = particles[1];
+    particle p2 = particles[2];
+
+    if(p0.mass == 5 && p0.xPos == 23 && p0.yPos == 28 && p0.xVelocity == 72 &&
+       p0.yVelocity == 12 && p0.xAccel == 33 && p0.yAccel == 44 &&
+       p1.mass == 58 && p1.xPos == 3 && p1.yPos == 21 && p1.xVelocity == 55 &&
+       p1.yVelocity == 78 && p1.xAccel == 13 && p1.yAccel == 48 &&
+       p2.mass == 99 && p2.xPos == 83 && p2.yPos == 19 && p2.xVelocity == 64 &&
+       p2.yVelocity == 56 && p2.xAccel == 19 && p2.yAccel == 32){
+        std::cout << "nBodyFileNameConstructorWorks PASSED" << std::endl;
+        return true;
+   }else{
+        std::cout << "Value from sample file was not read into nBody correctly." << std::endl;
+        return false;
+   }
+}
 

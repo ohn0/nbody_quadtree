@@ -1,7 +1,10 @@
 #ifndef NBODY_H
 #define NBODY_H
-#include <string.h>
+#include <string>
+#include <iostream>
+#include <fstream>
 #include "../quadtree.h"
+#define GRAV_CONST 6.674E-11
 
 #ifndef PARTICLE_STRUCT_H
 #define PARTICLE_STRUCT_H
@@ -42,12 +45,15 @@ class nBody
         nBody(std::string);
         nBody(particle*);
         void setThreshold(double threshold){calculationThreshold = threshold;}
-
+        const particle* getParticles(){return this->particles;}
+        int getParticleNum(){return this->numParticles;}
+        double calculateNetForce(particle*);
         virtual ~nBody();
 
     protected:
 
     private:
+        int numParticles;
         particle* particles;
         quadtree<quadNode> Qtree;
         double calculationThreshold = 0.5f;
