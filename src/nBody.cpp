@@ -15,22 +15,22 @@ nBody::nBody(std::string filename)
 {
     /*
     file format:
-    line 0:numberOfParticles
-    line 1:                 xPosition yPosition xVelocity yVelocity xAcceleration yAcceleration mass
+    line 0:numberOfParticles widthOfField heightOfField
+    line 1:xPosition yPosition xVelocity yVelocity xAcceleration yAcceleration mass
     .
+    .repeat numberOfParticles times
     .
-    .
-    line numberOfParcticles:xPosition yPosition xVelocity yVelocity xAcceleration yAcceleration mass
     */
-
     std::ifstream particleFile(filename);
     if(!particleFile.is_open()){
         printf("Error opening %s.\n", filename.c_str());
     }
     else{
-        particleFile >> numParticles;
+        particleFile >> numParticles >> fieldWidth >> fieldHeight;
         this->particles = new particle[numParticles];
+        this->quadNodes = new quadNode[numParticles];
         int i = 0;
+        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
         while(!particleFile.eof()){
     //        particles[i] = new particle;
             particleFile >> particles[i].xPos;
@@ -43,8 +43,21 @@ nBody::nBody(std::string filename)
             particleFile >> particles[i].yAccel;
 
             particleFile >> particles[i].mass;
+
+            quadNodes[i].particleNode = &particles[i];
             i++;
         }
+
+        this->generateQuadTree();
+    }
+}
+
+int nBody::generateQuadTree()
+{
+    for(int i = 0; i < this->numParticles; i++){
+        Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
+                            quadNodes[i].particleNode->yPos);
+
     }
 }
 
@@ -89,3 +102,5 @@ double calculateCenterOfMassY(quadtree<quadNode>* Q)
         return Q->getValue()->particleNode->yPos * Q->getValue()->particleNode->mass;
     }
 }
+
+
