@@ -245,7 +245,10 @@ bool massOfChildrenCorrectlyCalculated()
         std::cout << "massOfChildrenCorrectlyCalculated PASSED" << std::endl;
         return true;
     }else{
-        std::cout << "Root node does not contain the mass of all the particles." << std::endl;
+        std::cout << "Root node does not contain the mass of all the particles."
+                  << " Correct mass is " << totalMass << ", mass of root node is "
+                  << rootNode->massOfChildren<<std::endl;
+
         return false;
     }
 }

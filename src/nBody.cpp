@@ -124,8 +124,11 @@ double calculateMassOfChildren(quadtree<quadNode>* Q)
         return Q->getValue()->massOfChildren;
 
     }else{
-        if(Q->getValue()->particleNode != nullptr){
+        if(Q->getValue() != nullptr && Q->getValue()->particleNode != nullptr){
             return Q->getValue()->particleNode->mass;
+        }
+        else{
+            return 0.f;
         }
     }
 }
