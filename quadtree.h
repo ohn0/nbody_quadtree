@@ -77,7 +77,9 @@ template <class T> quadtree<T>::~quadtree()
     if(!this->isExternal){
         int i;
         for(i = 0; i < 4; i++){
-//            delete this->quads[i]->getValue();
+            if(this->quads[i]->getValue() != nullptr && !this->quads[i]->isExternalNode()){
+                delete this->quads[i]->getValue();
+            }
             delete this->quads[i];
         }
     }
@@ -133,7 +135,7 @@ template <class T> int quadtree<T>::insertElement(T* element, double X, double Y
     */
 
     printf("Inserting (%f, %f)\n", X, Y);
-    if(this->value != nullptr){
+    if(this->value != nullptr && this->isExternal){
         this->subdivide();
         this->isExternal = false;
         quadtree<T>* validRootQuad = this->findValidQuadrant(this->X, this->Y);

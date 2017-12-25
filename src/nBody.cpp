@@ -115,6 +115,7 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
 
 double calculateMassOfChildren(quadtree<quadNode>* Q)
 {
+    printf("At %p\n", Q);
     if(!Q->isExternalNode()){
         printf("getting child mass\n");
         Q->getValue()->massOfChildren = 0.f;
@@ -125,6 +126,7 @@ double calculateMassOfChildren(quadtree<quadNode>* Q)
 
     }else{
         if(Q->getValue() != nullptr && Q->getValue()->particleNode != nullptr){
+            printf("Returning %f\n", Q->getValue()->particleNode->mass);
             return Q->getValue()->particleNode->mass;
         }
         else{
@@ -135,21 +137,26 @@ double calculateMassOfChildren(quadtree<quadNode>* Q)
 
 double calculateCenterOfMassX(quadtree<quadNode>* Q)
 {
-    if(Q->getValue()->particleNode != nullptr){
+    if(!Q->isExternalNode()){
         Q->getValue()->centerOfMassX = 0.f;
         for(int i = 0; i < 4; i++){
             Q->getValue()->centerOfMassX += calculateCenterOfMassX(Q->getQuads()[i]);
         }
+        printf("CoMX is %f\n", Q->getValue()->centerOfMassX);
         Q->getValue()->centerOfMassX = Q->getValue()->centerOfMassX/Q->getValue()->massOfChildren;
         return Q->getValue()->centerOfMassX;
     }else{
-        return Q->getValue()->particleNode->mass * Q->getValue()->particleNode->xPos;
+        if(Q->getValue() != nullptr && Q->getValue()->particleNode != nullptr){
+            return Q->getValue()->particleNode->mass * Q->getValue()->particleNode->xPos;
+        }else{
+            return 0.f;
+        }
     }
 }
 
 double calculateCenterOfMassY(quadtree<quadNode>* Q)
 {
-    if(Q->getValue()->particleNode != nullptr){
+    if(!Q->isExternalNode()){
         Q->getValue()->centerOfMassY = 0.f;
         for(int i = 0; i < 4; i++){
             Q->getValue()->centerOfMassY += calculateCenterOfMassY(Q->getQuads()[i]);
@@ -157,7 +164,11 @@ double calculateCenterOfMassY(quadtree<quadNode>* Q)
         Q->getValue()->centerOfMassY = Q->getValue()->centerOfMassY/Q->getValue()->massOfChildren;
         return Q->getValue()->centerOfMassY;
     }else{
-        return Q->getValue()->particleNode->yPos * Q->getValue()->particleNode->mass;
+        if(Q->getValue() != nullptr && Q->getValue()->particleNode != nullptr){
+            return Q->getValue()->particleNode->yPos * Q->getValue()->particleNode->mass;
+        }else{
+            return 0.f;
+        }
     }
 }
 

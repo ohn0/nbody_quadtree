@@ -13,6 +13,7 @@ bool nonexistentElementNotFound();
 bool deletingNonExistentElementDoesNothing();
 bool nBodyFileNameConstructorWorks();
 bool massOfChildrenCorrectlyCalculated();
+bool rootCenterOfMassCorrectlyCalculated();
 
 int main(int argc, char** argv)
 {
@@ -44,7 +45,8 @@ bool testQuadTree()
 
 bool testNBody()
 {
-    if(nBodyFileNameConstructorWorks() && massOfChildrenCorrectlyCalculated()){
+    if(nBodyFileNameConstructorWorks() && massOfChildrenCorrectlyCalculated() &&
+       rootCenterOfMassCorrectlyCalculated()){
         std::cout << "------------------All NBody tests passed!------------------" << std::endl;
         return true;
     }else{
@@ -249,6 +251,32 @@ bool massOfChildrenCorrectlyCalculated()
                   << " Correct mass is " << totalMass << ", mass of root node is "
                   << rootNode->massOfChildren<<std::endl;
 
+        return false;
+    }
+}
+
+bool rootCenterOfMassCorrectlyCalculated()
+{
+    nBody nSystem("particles");
+    quadtree<quadNode>* rootNode = nSystem.getQuadTree();
+    calculateMassOfChildren(rootNode);
+
+    calculateCenterOfMassX(rootNode);
+    calculateCenterOfMassY(rootNode);
+    int totalMass = 5 + 58 + 99;
+    double CoMX = ((23*5.f)+(3.f*58)+(83.f*99))/(double)totalMass;
+    double CoMY = ((28*5.f)+(21.f*58)+(19.f*99))/(double)totalMass;
+
+    double rootCoMX = rootNode->getValue()->centerOfMassX;
+    double rootCoMY = rootNode->getValue()->centerOfMassY;
+
+    if(std::abs(CoMX - rootCoMX) < 1 && std::abs(CoMY - rootCoMY) < 1){
+        std::cout << "rootCenterOfMassCorrectlyCalculated PASSED" << std::endl;
+        return true;
+    }else{
+        std::cout << "Root has incorrect center of mass location.\nRoot Center: "<<
+        rootCoMX << ", " << rootCoMY << "\nActual Center: " << CoMX << ", "
+        << CoMY << std::endl;
         return false;
     }
 }
