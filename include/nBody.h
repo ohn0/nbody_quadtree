@@ -9,26 +9,29 @@
 #ifndef PARTICLE_STRUCT_H
 #define PARTICLE_STRUCT_H
 struct particle{
-    int xPos;
-    int yPos;
+    int xPos = 0;
+    int yPos = 0;
 
-    double xVelocity;
-    double yVelocity;
+    double xVelocity = 0.f;
+    double yVelocity = 0.f;
 
-    double xAccel;
-    double yAccel;
+    double xAccel = 0.f;
+    double yAccel = 0.f;
 
-    double mass;
+    double forceX = 0.f;
+    double forceY = 0.f;
+
+    double mass = 0.f;
 };
 
 #ifndef QUAD_NODE_STRUCT_H
 #define QUAD_NODE_STRUCT_H
 struct quadNode
 {
-    double massOfChildren;
-    double centerOfMassX;
-    double centerOfMassY;
-    particle* particleNode;
+    double massOfChildren = 0.f;
+    double centerOfMassX = 0.f;
+    double centerOfMassY = 0.f;
+    particle* particleNode = nullptr;
 };
 #endif // QUAD_NODE_STRUCT_H
 
@@ -48,7 +51,8 @@ class nBody
         const particle* getParticles(){return this->particles;}
         int getParticleNum(){return this->numParticles;}
         int generateQuadTree();
-        double calculateNetForce(particle*);
+        quadtree<quadNode>* getQuadTree(){return &(this->Qtree);}
+        int calculateNetForce(particle*, quadtree<quadNode>*);
         virtual ~nBody();
 
     protected:

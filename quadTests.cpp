@@ -12,6 +12,7 @@ bool existingElementIsFound();
 bool nonexistentElementNotFound();
 bool deletingNonExistentElementDoesNothing();
 bool nBodyFileNameConstructorWorks();
+bool massOfChildrenCorrectlyCalculated();
 
 int main(int argc, char** argv)
 {
@@ -43,7 +44,7 @@ bool testQuadTree()
 
 bool testNBody()
 {
-    if(nBodyFileNameConstructorWorks()){
+    if(nBodyFileNameConstructorWorks() && massOfChildrenCorrectlyCalculated()){
         std::cout << "------------------All NBody tests passed!------------------" << std::endl;
         return true;
     }else{
@@ -110,7 +111,7 @@ bool validQuadrantIsFound()
     Q.insertElement(&node, 10.f, 10.f);
     Q.insertElement(&nodeB,11.f, 10.f);
 
-    if(Q.getValue() == nullptr){
+    if(Q.getValue() != &node && Q.getValue() != &nodeB){
         std::cout << "validQuadrantIsFound PASSED" << std::endl;
         return true;
     }
@@ -233,3 +234,18 @@ bool nBodyFileNameConstructorWorks()
    }
 }
 
+bool massOfChildrenCorrectlyCalculated()
+{
+    nBody nSystem("particles");
+    calculateMassOfChildren(nSystem.getQuadTree());
+    int totalMass = 5 + 58 + 99;
+    quadNode* rootNode = nSystem.getQuadTree()->getValue();
+
+    if(std::abs(totalMass - rootNode->massOfChildren) < 1){
+        std::cout << "massOfChildrenCorrectlyCalculated PASSED" << std::endl;
+        return true;
+    }else{
+        std::cout << "Root node does not contain the mass of all the particles." << std::endl;
+        return false;
+    }
+}

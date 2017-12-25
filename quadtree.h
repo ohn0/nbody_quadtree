@@ -56,7 +56,7 @@ class quadtree
 template <typename T> quadtree<T>::quadtree()
 {
     this->isExternal = true;
-    this->value = NULL;
+    this->value = nullptr;
 }
 
 template <typename T> quadtree<T>::quadtree(int stX, int stY, int szX, int szY)
@@ -67,7 +67,7 @@ template <typename T> quadtree<T>::quadtree(int stX, int stY, int szX, int szY)
     this->sizeY = szY;
     this->startX = stX;
     this->startY = stY;
-    this->value = NULL;
+    this->value = nullptr;
     this->occupiedQuadrants = 0;
     X = Y = 0.f;
 }
@@ -77,6 +77,7 @@ template <class T> quadtree<T>::~quadtree()
     if(!this->isExternal){
         int i;
         for(i = 0; i < 4; i++){
+//            delete this->quads[i]->getValue();
             delete this->quads[i];
         }
     }
@@ -137,7 +138,7 @@ template <class T> int quadtree<T>::insertElement(T* element, double X, double Y
         this->isExternal = false;
         quadtree<T>* validRootQuad = this->findValidQuadrant(this->X, this->Y);
         validRootQuad->insertElement(this->value, this->X, this->Y);
-        this->value = nullptr;
+        this->value = new T;
         quadtree<T>* validQuad = this->findValidQuadrant(X, Y);
         validQuad->insertElement(element, X, Y);
         return 0;

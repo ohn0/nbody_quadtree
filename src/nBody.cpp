@@ -1,4 +1,4 @@
-#include "nBody.h"
+#include "../include/nBody.h"
 
 nBody::nBody()
 {
@@ -47,7 +47,7 @@ nBody::nBody(std::string filename)
             quadNodes[i].particleNode = &particles[i];
             i++;
         }
-
+        particleFile.close();
         this->generateQuadTree();
     }
 }
@@ -55,15 +55,68 @@ nBody::nBody(std::string filename)
 int nBody::generateQuadTree()
 {
     for(int i = 0; i < this->numParticles; i++){
-        Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
-                            quadNodes[i].particleNode->yPos);
-
+        if(Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
+                            quadNodes[i].particleNode->yPos) == -1){
+            printf("Problem encountered attempting to insert particle into quadtree.\n");
+            return -1;
+        }
     }
+    return 0;
+}
+
+int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
+{
+
+    if(Q->getValue() == nullptr){
+        return 0;
+    }
+    if(Q->getValue()->particleNode->xPos == P->xPos &&
+       Q->getValue()->particleNode->yPos == P->yPos){
+        return 0;
+    }
+
+    double distance, Xdist, Ydist, gravNetForce;
+    if(Q->isExternalNode()){
+        distance = std::sqrt(std::pow(P->xPos - Q->getValue()->particleNode->xPos, 2) +
+                             std::pow(P->yPos - Q->getValue()->particleNode->yPos,2));
+        particle* qParticle = Q->getValue()->particleNode;
+        Xdist = P->xPos - qParticle->xPos;
+        Ydist = P->yPos - qParticle->yPos;
+        gravNetForce = (GRAV_CONST * P->mass * qParticle->mass) / distance;
+
+        P->forceX += (gravNetForce * Xdist);
+        P->forceY += (gravNetForce * Ydist);
+        return 0;
+    }
+
+    distance = std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
+                                std::pow(P->yPos - Q->getValue()->centerOfMassY,2));
+    if(((double)Q->getsX())/distance > this->calculationThreshold){
+        for(int i = 0; i < 4; i++){
+            this->calculateNetForce(P, Q->getQuads()[i]);
+        }
+        return 0;
+    }else{
+        quadNode* node = Q->getValue();
+        Xdist = P->xPos - node->centerOfMassX;
+        Ydist = P->yPos - node->centerOfMassY;
+
+        gravNetForce = (GRAV_CONST * P->mass * node->massOfChildren) / distance;
+
+        P->forceX += (gravNetForce * Xdist);
+        P->forceY += (gravNetForce * Ydist);
+
+        return 0;
+    }
+
+    printf("Unable to calculate net force.\n");
+    return -1;
 }
 
 double calculateMassOfChildren(quadtree<quadNode>* Q)
 {
     if(!Q->isExternalNode()){
+        printf("getting child mass\n");
         Q->getValue()->massOfChildren = 0.f;
         for(int i = 0; i < 4; i++){
             Q->getValue()->massOfChildren += calculateMassOfChildren(Q->getQuads()[i]);
@@ -71,7 +124,9 @@ double calculateMassOfChildren(quadtree<quadNode>* Q)
         return Q->getValue()->massOfChildren;
 
     }else{
-        return Q->getValue()->particleNode->mass;
+        if(Q->getValue()->particleNode != nullptr){
+            return Q->getValue()->particleNode->mass;
+        }
     }
 }
 
