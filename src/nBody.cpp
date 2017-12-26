@@ -64,28 +64,45 @@ int nBody::generateQuadTree()
     return 0;
 }
 
+int nBody::updateNetForce()
+{
+    int retVal = 0;
+    for(int i = 0; i < this->numParticles; i++){
+        retVal = this->calculateNetForce(&(this->particles[i]), &(this->Qtree));
+        if(retVal == -1){
+            printf("Error calculating net force.\n");
+            return retVal;
+        }
+    }
+    return retVal;
+}
+
 int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
 {
 
     if(Q->getValue() == nullptr){
         return 0;
     }
-    if(Q->getValue()->particleNode->xPos == P->xPos &&
-       Q->getValue()->particleNode->yPos == P->yPos){
-        return 0;
-    }
 
     double distance, Xdist, Ydist, gravNetForce;
     if(Q->isExternalNode()){
+        if(Q->getValue()->particleNode->xPos == P->xPos &&
+           Q->getValue()->particleNode->yPos == P->yPos){
+            printf("Can't calculate force acting on same object.\n");
+            return 0;
+        }
         distance = std::sqrt(std::pow(P->xPos - Q->getValue()->particleNode->xPos, 2) +
                              std::pow(P->yPos - Q->getValue()->particleNode->yPos,2));
+        printf("Distance value is %f\n", distance);
         particle* qParticle = Q->getValue()->particleNode;
         Xdist = P->xPos - qParticle->xPos;
         Ydist = P->yPos - qParticle->yPos;
-        gravNetForce = (GRAV_CONST * P->mass * qParticle->mass) / distance;
-
+        gravNetForce = -1*(GRAV_CONST * P->mass * qParticle->mass) / distance;
+        printf("Gravitational net force is %.18f given pmass %.9f and qmass %.9f with Gforce %.9f.\n",
+               gravNetForce, P->mass, qParticle->mass, GRAV_CONST);
         P->forceX += (gravNetForce * Xdist);
         P->forceY += (gravNetForce * Ydist);
+        printf("Net Force: (%.20f, %.20f)\n", P->forceX, P->forceY);
         return 0;
     }
 
@@ -158,8 +175,8 @@ double calculateCenterOfMassX(quadtree<quadNode>* Q)
         }
         Q->getValue()->centerOfMassX = Q->getValue()->centerOfMassX/Q->getValue()->massOfChildren;
         return Q->getValue()->centerOfMassX;
-
     }
+    return 0.f;
 }
 
 double calculateCenterOfMassY(quadtree<quadNode>* Q)
@@ -186,6 +203,7 @@ double calculateCenterOfMassY(quadtree<quadNode>* Q)
         Q->getValue()->centerOfMassY = Q->getValue()->centerOfMassY/Q->getValue()->massOfChildren;
         return Q->getValue()->centerOfMassY;
     }
+    return 0.f;
 }
 
 

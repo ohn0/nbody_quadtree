@@ -14,6 +14,8 @@ bool deletingNonExistentElementDoesNothing();
 bool nBodyFileNameConstructorWorks();
 bool massOfChildrenCorrectlyCalculated();
 bool rootCenterOfMassCorrectlyCalculated();
+bool netForceCorrectlyCalculated();
+
 
 int main(int argc, char** argv)
 {
@@ -46,7 +48,7 @@ bool testQuadTree()
 bool testNBody()
 {
     if(nBodyFileNameConstructorWorks() && massOfChildrenCorrectlyCalculated() &&
-       rootCenterOfMassCorrectlyCalculated()){
+       rootCenterOfMassCorrectlyCalculated() && netForceCorrectlyCalculated()){
         std::cout << "------------------All NBody tests passed!------------------" << std::endl;
         return true;
     }else{
@@ -280,3 +282,40 @@ bool rootCenterOfMassCorrectlyCalculated()
         return false;
     }
 }
+
+bool netForceCorrectlyCalculated()
+{
+    nBody nSystem("particlesGrav");
+    quadtree<quadNode>* rootNode = nSystem.getQuadTree();
+
+    calculateMassOfChildren(rootNode);
+    calculateCenterOfMassX(rootNode);
+    calculateCenterOfMassY(rootNode);
+
+    nSystem.updateNetForce();
+    const particle* P = nSystem.getParticles();
+    double smallForceVec = std::sqrt(std::pow(P[0].forceX,2)+
+                                     std::pow(P[0].forceY,2));
+    double bigForceVec = std::sqrt(std::pow(P[1].forceX,2)+
+                                     std::pow(P[1].forceY,2));
+    double smallForceVecB = std::sqrt(std::pow(P[2].forceX,2)+
+                                     std::pow(P[2].forceY,2));
+
+
+    for(int i = 0; i < nSystem.getParticleNum(); i++){
+        printf("Net force on p%d: (%.20f,%.20f)\n", i, P[i].forceX, P[i].forceY);
+        printf("Length of force vector p%d: %.20f\n", i,std::sqrt(std::pow(P[i].forceX,2)
+                                                                 +std::pow(P[i].forceY,2)));
+    }
+
+
+    if(bigForceVec > smallForceVec && bigForceVec > smallForceVecB){
+        std::cout << "netForceCorrectlyCalculated PASSED" << std::endl;
+        return true;
+    }
+    std::cout << "Force vector magnitude of the smaller body was greater " <<
+                 "than the force vector of the bigger body." << std::endl;
+
+    return false;
+}
+

@@ -4,8 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include "../quadtree.h"
-#define GRAV_CONST 6.674E-11
-
+const double GRAV_CONST = 6.674E-11;
 #ifndef PARTICLE_STRUCT_H
 #define PARTICLE_STRUCT_H
 struct particle{
@@ -52,7 +51,7 @@ class nBody
         int getParticleNum(){return this->numParticles;}
         int generateQuadTree();
         quadtree<quadNode>* getQuadTree(){return &(this->Qtree);}
-        int calculateNetForce(particle*, quadtree<quadNode>*);
+        int updateNetForce();
         virtual ~nBody();
 
     protected:
@@ -60,6 +59,7 @@ class nBody
     private:
         int numParticles, fieldWidth, fieldHeight;
         particle* particles;
+        int calculateNetForce(particle*, quadtree<quadNode>*);
         quadNode* quadNodes;
         quadtree<quadNode> Qtree;
         double calculationThreshold = 0.5f;
