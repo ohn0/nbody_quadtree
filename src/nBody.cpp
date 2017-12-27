@@ -30,7 +30,6 @@ nBody::nBody(std::string filename)
         this->particles = new particle[numParticles];
         this->quadNodes = new quadNode[numParticles];
         int i = 0;
-        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
         while(!particleFile.eof()){
     //        particles[i] = new particle;
             particleFile >> particles[i].xPos;
@@ -47,19 +46,31 @@ nBody::nBody(std::string filename)
             quadNodes[i].particleNode = &particles[i];
             i++;
         }
+        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
         particleFile.close();
-        this->generateQuadTree();
+        this->updateQuadTree();
     }
 }
 
-int nBody::generateQuadTree()
+int nBody::updateQuadTree()
 {
-    for(int i = 0; i < this->numParticles; i++){
-        if(Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
-                            quadNodes[i].particleNode->yPos) == -1){
-            printf("Problem encountered attempting to insert particle into quadtree.\n");
-            return -1;
+    if(!Qtree.isExternalNode()){
+        for(int i = 0; i < 4; i++){
+            delete this->Qtree.getQuads()[i];
         }
+    }
+    Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
+    for(int i = 0; i < this->numParticles; i++){
+        if(quadNodes[i].particleNode->xPos > 0 &&
+           quadNodes[i].particleNode->xPos < fieldWidth &&
+           quadNodes[i].particleNode->yPos > 0 &&
+           quadNodes[i].particleNode->yPos < fieldHeight){
+            if(Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
+                                quadNodes[i].particleNode->yPos) == -1){
+                printf("Problem encountered attempting to insert particle into quadtree.\n");
+                return -1;
+            }
+       }
     }
     return 0;
 }
@@ -75,6 +86,38 @@ int nBody::updateNetForce()
         }
     }
     return retVal;
+}
+
+int nBody::simulate(double timestep)
+{
+    particle* particles = this->particles;
+    for(int i = 0; i < this->getParticleNum(); i++){
+        this->updateAcceleration(&particles[i]);
+        this->updateVelocity(&particles[i], timestep);
+        this->updatePosition(&particles[i], timestep);
+    }
+    return 0;
+}
+
+int nBody::updateAcceleration(particle* P)
+{
+    P->xAccel = P->forceX / P->mass;
+    P->yAccel = P->forceY / P->mass;
+    return 0;
+}
+
+int nBody::updateVelocity(particle* P, double timestep)
+{
+    P->xVelocity += (P->xAccel * timestep);
+    P->yVelocity += (P->yAccel * timestep);
+    return 0;
+}
+
+int nBody::updatePosition(particle* P, double timestep)
+{
+    P->xPos += (P->xVelocity * timestep);
+    P->yPos += (P->yVelocity * timestep);
+    return 0;
 }
 
 int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)

@@ -49,8 +49,9 @@ class nBody
         void setThreshold(double threshold){calculationThreshold = threshold;}
         const particle* getParticles(){return this->particles;}
         int getParticleNum(){return this->numParticles;}
-        int generateQuadTree();
+        int updateQuadTree();
         quadtree<quadNode>* getQuadTree(){return &(this->Qtree);}
+        int simulate(double);
         int updateNetForce();
         virtual ~nBody();
 
@@ -60,6 +61,9 @@ class nBody
         int numParticles, fieldWidth, fieldHeight;
         particle* particles;
         int calculateNetForce(particle*, quadtree<quadNode>*);
+        int updateAcceleration(particle*);
+        int updateVelocity(particle*, double);
+        int updatePosition(particle*, double);
         quadNode* quadNodes;
         quadtree<quadNode> Qtree;
         double calculationThreshold = 0.5f;

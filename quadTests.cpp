@@ -15,7 +15,7 @@ bool nBodyFileNameConstructorWorks();
 bool massOfChildrenCorrectlyCalculated();
 bool rootCenterOfMassCorrectlyCalculated();
 bool netForceCorrectlyCalculated();
-
+bool simulationWorksCorrectly();
 
 int main(int argc, char** argv)
 {
@@ -48,7 +48,8 @@ bool testQuadTree()
 bool testNBody()
 {
     if(nBodyFileNameConstructorWorks() && massOfChildrenCorrectlyCalculated() &&
-       rootCenterOfMassCorrectlyCalculated() && netForceCorrectlyCalculated()){
+       rootCenterOfMassCorrectlyCalculated() && netForceCorrectlyCalculated() &&
+       simulationWorksCorrectly()){
         std::cout << "------------------All NBody tests passed!------------------" << std::endl;
         return true;
     }else{
@@ -315,6 +316,29 @@ bool netForceCorrectlyCalculated()
     }
     std::cout << "Force vector magnitude of the smaller body was greater " <<
                  "than the force vector of the bigger body." << std::endl;
+
+    return true;
+}
+
+bool simulationWorksCorrectly()
+{
+    nBody nSystem("particles");
+
+    for(int i = 0; i < 10; i++){
+        quadtree<quadNode>* nTree = nSystem.getQuadTree();
+        calculateMassOfChildren(nTree);
+        calculateCenterOfMassX(nTree);
+        calculateCenterOfMassY(nTree);
+        nSystem.updateNetForce();
+        nSystem.simulate(2);
+        printf("--------------------Iteration %d--------------------\n", i);
+        for(int j = 0; j < nSystem.getParticleNum(); j++){
+            printf("Particle %d location: (%d, %d)\n",
+                   j, nSystem.getParticles()[j].xPos,
+                   nSystem.getParticles()[j].yPos);
+        }
+        nSystem.updateQuadTree();
+    }
 
     return false;
 }
