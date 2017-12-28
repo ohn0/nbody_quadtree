@@ -163,14 +163,17 @@ template <class T> int quadtree<T>::subdivide()
     /*
     Subdivides the calling quadtree into 4 quadtrees.
     */
+
+    int halfSizeX = (int)std::ceil(this->sizeX/2.f);
+    int halfSizeY = (int)std::ceil(this->sizeY/2.f);
     this->quads[NW] = new quadtree<T>(this->startX , this->startY,
-                               this->sizeX/2, this->sizeY/2);
-    this->quads[NE] = new quadtree<T>(this->startX + this->sizeX/2, this->startY,
-                               this->sizeX/2, this->sizeY/2);
-    this->quads[SW] = new quadtree<T>(this->startX, this->startY + this->sizeY/2,
-                               this->sizeX/2, this->sizeY/2);
-    this->quads[SE] = new quadtree<T>(this->startX + this->sizeX/2, this->startY+this->sizeY/2,
-                               this->sizeX/2, this->sizeY/2);
+                               halfSizeX, halfSizeY);
+    this->quads[NE] = new quadtree<T>(this->startX + halfSizeX, this->startY,
+                               halfSizeX, halfSizeY);
+    this->quads[SW] = new quadtree<T>(this->startX, this->startY + halfSizeY,
+                               halfSizeX, halfSizeY);
+    this->quads[SE] = new quadtree<T>(this->startX + halfSizeX, this->startY+halfSizeY,
+                               halfSizeX, halfSizeY);
     return 0;
 
 }

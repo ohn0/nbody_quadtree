@@ -9,6 +9,8 @@ nBody::~nBody()
 {
     //dtor
     delete[] particles;
+    delete[] quadNodes;
+    delete Qtree;
 }
 
 nBody::nBody(std::string filename)
@@ -46,7 +48,8 @@ nBody::nBody(std::string filename)
             quadNodes[i].particleNode = &particles[i];
             i++;
         }
-        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
+//        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
+        Qtree = nullptr;
         particleFile.close();
         this->updateQuadTree();
     }
@@ -54,22 +57,23 @@ nBody::nBody(std::string filename)
 
 int nBody::updateQuadTree()
 {
-    if(!Qtree.isExternalNode()){
-        for(int i = 0; i < 4; i++){
-            delete this->Qtree.getQuads()[i];
-        }
+    if(Qtree != nullptr ){
+        delete Qtree;
     }
-    Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
+    Qtree = new quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
     for(int i = 0; i < this->numParticles; i++){
         if(quadNodes[i].particleNode->xPos > 0 &&
            quadNodes[i].particleNode->xPos < fieldWidth &&
            quadNodes[i].particleNode->yPos > 0 &&
            quadNodes[i].particleNode->yPos < fieldHeight){
-            if(Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
+            if(Qtree->insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
                                 quadNodes[i].particleNode->yPos) == -1){
                 printf("Problem encountered attempting to insert particle into quadtree.\n");
                 return -1;
             }
+       }else{
+            printf("Unable to insert point (%d, %d), not in bounds.\n", quadNodes[i].particleNode->xPos,
+                   quadNodes[i].particleNode->yPos);
        }
     }
     return 0;
@@ -79,7 +83,7 @@ int nBody::updateNetForce()
 {
     int retVal = 0;
     for(int i = 0; i < this->numParticles; i++){
-        retVal = this->calculateNetForce(&(this->particles[i]), &(this->Qtree));
+        retVal = this->calculateNetForce(&(this->particles[i]), (this->Qtree));
         if(retVal == -1){
             printf("Error calculating net force.\n");
             return retVal;
@@ -138,9 +142,9 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
                              std::pow(P->yPos - Q->getValue()->particleNode->yPos,2));
         printf("Distance value is %f\n", distance);
         particle* qParticle = Q->getValue()->particleNode;
-        Xdist = P->xPos - qParticle->xPos;
-        Ydist = P->yPos - qParticle->yPos;
-        gravNetForce = -1*(GRAV_CONST * P->mass * qParticle->mass) / distance;
+        Xdist = std::abs(P->xPos - qParticle->xPos);
+        Ydist = std::abs(P->yPos - qParticle->yPos);
+        gravNetForce = (GRAV_CONST * P->mass * qParticle->mass) / distance;
         printf("Gravitational net force is %.18f given pmass %.9f and qmass %.9f with Gforce %.9f.\n",
                gravNetForce, P->mass, qParticle->mass, GRAV_CONST);
         P->forceX += (gravNetForce * Xdist);
@@ -150,7 +154,7 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
     }
 
     distance = std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
-                                std::pow(P->yPos - Q->getValue()->centerOfMassY,2));
+                         std::pow(P->yPos - Q->getValue()->centerOfMassY,2));
     if(((double)Q->getsX())/distance > this->calculationThreshold){
         for(int i = 0; i < 4; i++){
             this->calculateNetForce(P, Q->getQuads()[i]);
