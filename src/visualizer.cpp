@@ -21,7 +21,8 @@ int visualizer::initVisualizer(const char* name, int width, int height)
         printf("Error initiating SDL, erro %s\n", SDL_GetError());
         return -1;
     }
-
+    this->screenWidth = width;
+    this->screenHeight = height;
     this->visWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED,
                                        SDL_WINDOWPOS_UNDEFINED, width, height,
                                        SDL_WINDOW_SHOWN);
@@ -45,12 +46,15 @@ int visualizer::updateVisuals(nBody* nSystem)
     }
     SDL_SetRenderDrawColor(this->visRenderer, 255,255,255,255);
 
+    double nWidth = nSystem->getFieldWidth();
+    double nHeight = nSystem->getFieldHeight();
     for(int i = 0; i < nSystem->getParticleNum(); i++){
-        pX = particles[i].xPos;
-        pY = particles[i].yPos;
+        pX = ((double)particles[i].xPos / nWidth) * this->screenWidth;
+        pY = ((double)particles[i].yPos / nHeight) * this->screenHeight;
 
-        if(pX > 0 && pX < this->screenWidth &&
-           pY > 0 && pY < this->screenHeight){
+//        printf("Drawing point at %d, %d\n", pX, pY);
+        if(pX >= 0 && pX <= this->screenWidth &&
+           pY >= 0 && pY <= this->screenHeight){
             SDL_SetRenderDrawColor(this->visRenderer, 255, 255, 255, 255);
             SDL_RenderDrawPoint(this->visRenderer, pX, pY);
        }
@@ -69,6 +73,9 @@ int visualizer::updateVisualsShowTree(nBody* nSystem)
     children.push_back(qTree);
     SDL_SetRenderDrawColor(this->visRenderer, 0,0,0,255);
     SDL_SetRenderDrawColor(this->visRenderer, 255,255,255,255);
+    double nWidth = nSystem->getFieldWidth();
+    double nHeight = nSystem->getFieldHeight();
+
     while(children.size() > 0){
         child = children.back();
         children.pop_back();
@@ -79,10 +86,10 @@ int visualizer::updateVisualsShowTree(nBody* nSystem)
                 }
             }
         }
-        r.x = (int)child->getstX();
-        r.y = (int)child->getstY();
-        r.w = (int)child->getsX();
-        r.h = (int)child->getsY();
+        r.x = (child->getstX()/nWidth) * this->screenWidth;
+        r.y = (child->getstY()/nHeight) * this->screenHeight;
+        r.w = (child->getsX()/nWidth) * this->screenWidth;
+        r.h = (child->getsY()/nHeight) * this->screenHeight;
         SDL_RenderDrawRect(this->visRenderer, &r);
     }
     return 0;

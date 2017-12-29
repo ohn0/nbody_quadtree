@@ -50,6 +50,8 @@ class nBody
         const particle* getParticles(){return this->particles;}
         int getParticleNum(){return this->numParticles;}
         int updateQuadTree();
+        int getFieldWidth(){return fieldWidth;}
+        int getFieldHeight(){return fieldHeight;}
         quadtree<quadNode>* getQuadTree(){return (this->Qtree);}
         int simulate(double);
         int updateNetForce();

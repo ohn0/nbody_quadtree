@@ -61,7 +61,7 @@ template <typename T> quadtree<T>::quadtree()
 
 template <typename T> quadtree<T>::quadtree(int stX, int stY, int szX, int szY)
 {
-    printf("Creating a quadrant with size (%d, %d) at location (%d, %d)\n", szX, szY, stX, stY);
+//    printf("Creating a quadrant with size (%d, %d) at location (%d, %d)\n", szX, szY, stX, stY);
     this->isExternal = true;
     this->sizeX = szX;
     this->sizeY = szY;
@@ -102,7 +102,7 @@ template <typename T> int quadtree<T>::deleteNode(int X, int Y)
     if(nodeToDeleteAddr == nullptr){
         return -1;
     }
-    printf("About to delete node at address %p\n", nodeToDeleteAddr);
+//    printf("About to delete node at address %p\n", nodeToDeleteAddr);
     (*nodeToDeleteAddr)->value = nullptr;
     (*nodeToDeleteAddr)->X =0.f;
     (*nodeToDeleteAddr)->Y =0.f;
@@ -134,7 +134,7 @@ template <class T> int quadtree<T>::insertElement(T* element, double X, double Y
 
     */
 
-    printf("Inserting (%f, %f)\n", X, Y);
+//    printf("Inserting (%f, %f)\n", X, Y);
     if(this->value != nullptr && this->isExternal){
         this->subdivide();
         this->isExternal = false;
@@ -194,18 +194,18 @@ template <class T> quadtree<T>* quadtree<T>::findValidQuadrant(double X, double 
     }
 
     int i;
-    printf("Finding a valid quadrant for (%f,%f)\n", X,Y);
+//    printf("Finding a valid quadrant for (%f,%f)\n", X,Y);
     for(i = 0; i < 4; i++){
-        printf("Start:(%d,%d)\nSize:(%d,%d)\n", this->quads[i]->startX,
-               this->quads[i]->startY, this->quads[i]->sizeX, this->quads[i]->sizeY);
+//        printf("Start:(%d,%d)\nSize:(%d,%d)\n", this->quads[i]->startX,
+//               this->quads[i]->startY, this->quads[i]->sizeX, this->quads[i]->sizeY);
         if(this->quads[i]->startX <= X &&
           (this->quads[i]->startX + this->quads[i]->sizeX >= X) &&
            this->quads[i]->startY <= Y &&
           (this->quads[i]->startY + this->quads[i]->sizeY >= Y)){
-                std::cout << "Found a valid quadrant starting at (" <<
-                this->quads[i]->startX <<","<<this->quads[i]->startY <<") " <<
-                "with size (" << this->quads[i]->sizeX <<"," << this->quads[i]->sizeY<<
-                ") that will contain the point(" << X << "," << Y <<")"<< std::endl;
+//                std::cout << "Found a valid quadrant starting at (" <<
+//                this->quads[i]->startX <<","<<this->quads[i]->startY <<") " <<
+//                "with size (" << this->quads[i]->sizeX <<"," << this->quads[i]->sizeY<<
+//                ") that will contain the point(" << X << "," << Y <<")"<< std::endl;
                 return this->quads[i];
            }
     }

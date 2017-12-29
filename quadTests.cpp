@@ -24,13 +24,13 @@ int main(int argc, char** argv)
 {
     simulationAnimationTest();
     return 0;
-    if(testQuadTree() && testNBody()){
-        std::cout << "------------------ALL tests passed!------------------" << std::endl;
-        return 0;
-    }else{
-        std::cout << "------------------Some tests failed. :(------------------" << std::endl;
-        return -1;
-    }
+//    if(testQuadTree() && testNBody()){
+//        std::cout << "------------------ALL tests passed!------------------" << std::endl;
+//        return 0;
+//    }else{
+//        std::cout << "------------------Some tests failed. :(------------------" << std::endl;
+//        return -1;
+//    }
 
 
 }
@@ -355,13 +355,14 @@ bool smallerMassParticleMovesTowardGreaterMassParticle()
 
 bool simulationAnimationTest()
 {
-    nBody nSystem("simTest");
+    nBody nSystem("qparticles");
     visualizer vis("v", 900,900);
-    vis.toggleTreeView(false);
+//    vis.toggleTreeView(true);
     quadtree<quadNode>* qTree;
     SDL_Event e;
     bool quit = false;
     bool updateVisuals = false;
+    printf("Ready.\n");
     while(!quit){
         while(SDL_PollEvent(&e)){
             if(e.key.keysym.sym == SDLK_ESCAPE){
@@ -370,33 +371,29 @@ bool simulationAnimationTest()
 
             if(e.type == SDL_KEYDOWN){
                 if(e.key.keysym.sym == SDLK_SPACE){
-                    updateVisuals = true;
+                    updateVisuals = !updateVisuals;
                 }
             }
         }
         const particle* particles;
-        for(int i = 0; i < 10000; i++){
-            updateVisuals = false;
+        if(updateVisuals){
             qTree = nSystem.getQuadTree();
             calculateMassOfChildren(qTree);
             calculateCenterOfMassX(qTree);
             calculateCenterOfMassY(qTree);
             nSystem.updateNetForce();
-            nSystem.simulate(2);
+            nSystem.simulate(1);
             vis.updateVisuals(&nSystem);
             nSystem.updateQuadTree();
             particles = nSystem.getParticles();
             for(int i = 0; i < nSystem.getParticleNum(); i++){
                 const particle P = particles[i];
-                printf("Particle %d info-------------------------\n",i);
-                printf("Position:(%d, %d)\nVelocity:(%f, %f)\nAcceleration:(%f, %f)\n",
-                       P.xPos, P.yPos, P.xVelocity, P.yVelocity, P.xAccel, P.yAccel);
+//                printf("Particle %d info-------------------------\n",i);
+//                printf("Position:(%d, %d)\nVelocity:(%f, %f)\nAcceleration:(%f, %f)\n",
+//                       P.xPos, P.yPos, P.xVelocity, P.yVelocity, P.xAccel, P.yAccel);
             }
         }
     }
-
-
-
     vis.deleteVisualizer();
     return true;
 }
