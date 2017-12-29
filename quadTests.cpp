@@ -1,5 +1,6 @@
 #include "quadtree.h"
 #include "nBody.h"
+#include "visualizer.h"
 #include <iostream>
 bool testQuadTree();
 bool testNBody();
@@ -14,16 +15,22 @@ bool deletingNonExistentElementDoesNothing();
 bool nBodyFileNameConstructorWorks();
 bool massOfChildrenCorrectlyCalculated();
 bool rootCenterOfMassCorrectlyCalculated();
+bool netForceCorrectlyCalculated();
+bool smallerMassParticleMovesTowardGreaterMassParticle();
+bool simulationAnimationTest();
+
 
 int main(int argc, char** argv)
 {
-    if(testQuadTree() && testNBody()){
-        std::cout << "------------------ALL tests passed!------------------" << std::endl;
-        return 0;
-    }else{
-        std::cout << "------------------Some tests failed. :(------------------" << std::endl;
-        return -1;
-    }
+    simulationAnimationTest();
+    return 0;
+//    if(testQuadTree() && testNBody()){
+//        std::cout << "------------------ALL tests passed!------------------" << std::endl;
+//        return 0;
+//    }else{
+//        std::cout << "------------------Some tests failed. :(------------------" << std::endl;
+//        return -1;
+//    }
 
 
 }
@@ -46,7 +53,8 @@ bool testQuadTree()
 bool testNBody()
 {
     if(nBodyFileNameConstructorWorks() && massOfChildrenCorrectlyCalculated() &&
-       rootCenterOfMassCorrectlyCalculated()){
+       rootCenterOfMassCorrectlyCalculated() && netForceCorrectlyCalculated() &&
+       smallerMassParticleMovesTowardGreaterMassParticle() && simulationAnimationTest()){
         std::cout << "------------------All NBody tests passed!------------------" << std::endl;
         return true;
     }else{
@@ -280,3 +288,113 @@ bool rootCenterOfMassCorrectlyCalculated()
         return false;
     }
 }
+
+bool netForceCorrectlyCalculated()
+{
+    nBody nSystem("particlesGrav");
+    quadtree<quadNode>* rootNode = nSystem.getQuadTree();
+
+    calculateMassOfChildren(rootNode);
+    calculateCenterOfMassX(rootNode);
+    calculateCenterOfMassY(rootNode);
+
+    nSystem.updateNetForce();
+    const particle* P = nSystem.getParticles();
+    double smallForceVec = std::sqrt(std::pow(P[0].forceX,2)+
+                                     std::pow(P[0].forceY,2));
+    double bigForceVec = std::sqrt(std::pow(P[1].forceX,2)+
+                                     std::pow(P[1].forceY,2));
+    double smallForceVecB = std::sqrt(std::pow(P[2].forceX,2)+
+                                     std::pow(P[2].forceY,2));
+
+
+    for(int i = 0; i < nSystem.getParticleNum(); i++){
+        printf("Net force on p%d: (%.20f,%.20f)\n", i, P[i].forceX, P[i].forceY);
+        printf("Length of force vector p%d: %.20f\n", i,std::sqrt(std::pow(P[i].forceX,2)
+                                                                 +std::pow(P[i].forceY,2)));
+    }
+
+
+    if(bigForceVec > smallForceVec && bigForceVec > smallForceVecB){
+        std::cout << "netForceCorrectlyCalculated PASSED" << std::endl;
+        return true;
+    }
+    std::cout << "Force vector magnitude of the smaller body was greater " <<
+                 "than the force vector of the bigger body." << std::endl;
+
+    return true;
+}
+
+bool smallerMassParticleMovesTowardGreaterMassParticle()
+{
+    nBody nSystem("particlesGrav");
+    int startXP1 = 50;
+    for(int i = 0; i < 10; i++){
+        quadtree<quadNode>* nTree = nSystem.getQuadTree();
+        calculateMassOfChildren(nTree);
+        calculateCenterOfMassX(nTree);
+        calculateCenterOfMassY(nTree);
+        nSystem.updateNetForce();
+        nSystem.simulate(2);
+        printf("--------------------Iteration %d--------------------\n", i);
+        for(int j = 0; j < nSystem.getParticleNum(); j++){
+            printf("Particle %d location: (%d, %d)\n",
+                   j, nSystem.getParticles()[j].xPos,
+                   nSystem.getParticles()[j].yPos);
+        }
+        nSystem.updateQuadTree();
+    }
+    int endXP1 = nSystem.getParticles()[0].xPos;
+    if(endXP1 < startXP1){
+        std::cout << "smallerMassParticleMovesTowardGreaterMassParticle PASSED" << std::endl;
+        return true;
+    }
+    std::cout << "The smaller mass particle moved away from the particle with greater mass." << std::endl;
+    return false;
+}
+
+bool simulationAnimationTest()
+{
+    nBody nSystem("qparticles1k");
+    visualizer vis("v", 900,900);
+    vis.toggleTreeView(true);
+    quadtree<quadNode>* qTree;
+    SDL_Event e;
+    bool quit = false;
+    bool updateVisuals = true;
+    printf("Ready.\n");
+    while(!quit){
+        while(SDL_PollEvent(&e)){
+            if(e.key.keysym.sym == SDLK_ESCAPE){
+                quit = true;
+            }
+
+            if(e.type == SDL_KEYDOWN){
+                if(e.key.keysym.sym == SDLK_SPACE){
+                    updateVisuals = !updateVisuals;
+                }
+            }
+        }
+        const particle* particles;
+        if(updateVisuals){
+            qTree = nSystem.getQuadTree();
+            calculateMassOfChildren(qTree);
+            calculateCenterOfMassX(qTree);
+            calculateCenterOfMassY(qTree);
+            nSystem.updateNetForce();
+            nSystem.simulate(2);
+            vis.updateVisuals(&nSystem);
+            nSystem.updateQuadTree();
+            particles = nSystem.getParticles();
+            for(int i = 0; i < nSystem.getParticleNum(); i++){
+                const particle P = particles[i];
+//                printf("Particle %d info-------------------------\n",i);
+//                printf("Position:(%d, %d)\nVelocity:(%f, %f)\nAcceleration:(%f, %f)\n",
+//                       P.xPos, P.yPos, P.xVelocity, P.yVelocity, P.xAccel, P.yAccel);
+            }
+        }
+    }
+    vis.deleteVisualizer();
+    return true;
+}
+

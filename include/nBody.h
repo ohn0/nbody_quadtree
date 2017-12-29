@@ -4,8 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include "../quadtree.h"
-#define GRAV_CONST 6.674E-11
-
+const double GRAV_CONST = 6.674E-11;
 #ifndef PARTICLE_STRUCT_H
 #define PARTICLE_STRUCT_H
 struct particle{
@@ -22,6 +21,7 @@ struct particle{
     double forceY = 0.f;
 
     double mass = 0.f;
+    bool used = true;
 };
 
 #ifndef QUAD_NODE_STRUCT_H
@@ -31,6 +31,7 @@ struct quadNode
     double massOfChildren = 0.f;
     double centerOfMassX = 0.f;
     double centerOfMassY = 0.f;
+    bool used = true;
     particle* particleNode = nullptr;
 };
 #endif // QUAD_NODE_STRUCT_H
@@ -50,9 +51,12 @@ class nBody
         void setThreshold(double threshold){calculationThreshold = threshold;}
         const particle* getParticles(){return this->particles;}
         int getParticleNum(){return this->numParticles;}
-        int generateQuadTree();
-        quadtree<quadNode>* getQuadTree(){return &(this->Qtree);}
-        int calculateNetForce(particle*, quadtree<quadNode>*);
+        int updateQuadTree();
+        int getFieldWidth(){return fieldWidth;}
+        int getFieldHeight(){return fieldHeight;}
+        quadtree<quadNode>* getQuadTree(){return (this->Qtree);}
+        int simulate(double);
+        int updateNetForce();
         virtual ~nBody();
 
     protected:
@@ -60,8 +64,12 @@ class nBody
     private:
         int numParticles, fieldWidth, fieldHeight;
         particle* particles;
+        int calculateNetForce(particle*, quadtree<quadNode>*);
+        int updateAcceleration(particle*);
+        int updateVelocity(particle*, double);
+        int updatePosition(particle*, double);
         quadNode* quadNodes;
-        quadtree<quadNode> Qtree;
+        quadtree<quadNode>* Qtree;
         double calculationThreshold = 0.5f;
 //        quad
 };

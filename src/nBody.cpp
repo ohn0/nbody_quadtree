@@ -1,5 +1,5 @@
 #include "../include/nBody.h"
-
+#define SOFTENING 8.f
 nBody::nBody()
 {
     //ctor
@@ -9,6 +9,8 @@ nBody::~nBody()
 {
     //dtor
     delete[] particles;
+    delete[] quadNodes;
+    delete Qtree;
 }
 
 nBody::nBody(std::string filename)
@@ -30,9 +32,7 @@ nBody::nBody(std::string filename)
         this->particles = new particle[numParticles];
         this->quadNodes = new quadNode[numParticles];
         int i = 0;
-        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
-        while(!particleFile.eof()){
-    //        particles[i] = new particle;
+        while(i < numParticles){
             particleFile >> particles[i].xPos;
             particleFile >> particles[i].yPos;
 
@@ -47,20 +47,82 @@ nBody::nBody(std::string filename)
             quadNodes[i].particleNode = &particles[i];
             i++;
         }
+//        Qtree = quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
+        Qtree = nullptr;
         particleFile.close();
-        this->generateQuadTree();
+        this->updateQuadTree();
     }
 }
 
-int nBody::generateQuadTree()
+int nBody::updateQuadTree()
 {
+    if(Qtree != nullptr ){
+        delete Qtree;
+    }
+    Qtree = new quadtree<quadNode>(0,0,fieldWidth, fieldHeight);
     for(int i = 0; i < this->numParticles; i++){
-        if(Qtree.insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
-                            quadNodes[i].particleNode->yPos) == -1){
-            printf("Problem encountered attempting to insert particle into quadtree.\n");
-            return -1;
+        if(quadNodes[i].particleNode->xPos > 0 &&
+           quadNodes[i].particleNode->xPos < fieldWidth &&
+           quadNodes[i].particleNode->yPos > 0 &&
+           quadNodes[i].particleNode->yPos < fieldHeight){
+            if(Qtree->insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
+                                quadNodes[i].particleNode->yPos) == -1){
+                quadNodes[i].used = false;
+                particles[i].used = false;
+                printf("Problem encountered attempting to insert particle into quadtree.\n");
+                return -1;
+            }
+       }
+    }
+    return 0;
+}
+
+int nBody::updateNetForce()
+{
+    int retVal = 0;
+    for(int i = 0; i < this->numParticles; i++){
+        if(this->particles[i].used != false){
+            retVal = this->calculateNetForce(&(this->particles[i]), (this->Qtree));
+        }
+        if(retVal == -1){
+            printf("Error calculating net force.\n");
+            return retVal;
         }
     }
+    return retVal;
+}
+
+int nBody::simulate(double timestep)
+{
+    particle* particles = this->particles;
+    for(int i = 0; i < this->getParticleNum(); i++){
+        if(particles[i].used != false){
+            this->updateAcceleration(&particles[i]);
+            this->updateVelocity(&particles[i], timestep);
+            this->updatePosition(&particles[i], timestep);
+        }
+    }
+    return 0;
+}
+
+int nBody::updateAcceleration(particle* P)
+{
+    P->xAccel = P->forceX / P->mass;
+    P->yAccel = P->forceY / P->mass;
+    return 0;
+}
+
+int nBody::updateVelocity(particle* P, double timestep)
+{
+    P->xVelocity += (P->xAccel * timestep);
+    P->yVelocity += (P->yAccel * timestep);
+    return 0;
+}
+
+int nBody::updatePosition(particle* P, double timestep)
+{
+    P->xPos += (P->xVelocity * timestep);
+    P->yPos += (P->yVelocity * timestep);
     return 0;
 }
 
@@ -70,27 +132,24 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
     if(Q->getValue() == nullptr){
         return 0;
     }
-    if(Q->getValue()->particleNode->xPos == P->xPos &&
-       Q->getValue()->particleNode->yPos == P->yPos){
-        return 0;
-    }
 
     double distance, Xdist, Ydist, gravNetForce;
+    distance = std::pow((std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
+                 std::pow(P->yPos - Q->getValue()->centerOfMassY,2)) + SOFTENING), 1.5f);
     if(Q->isExternalNode()){
-        distance = std::sqrt(std::pow(P->xPos - Q->getValue()->particleNode->xPos, 2) +
-                             std::pow(P->yPos - Q->getValue()->particleNode->yPos,2));
+        if(Q->getValue()->particleNode->xPos == P->xPos &&
+           Q->getValue()->particleNode->yPos == P->yPos){
+            return 0;
+        }
         particle* qParticle = Q->getValue()->particleNode;
-        Xdist = P->xPos - qParticle->xPos;
-        Ydist = P->yPos - qParticle->yPos;
-        gravNetForce = (GRAV_CONST * P->mass * qParticle->mass) / distance;
-
+        Xdist = (P->xPos - qParticle->xPos);
+        Ydist = (P->yPos - qParticle->yPos);
+        gravNetForce = -1*(GRAV_CONST * P->mass * qParticle->mass) / distance;
         P->forceX += (gravNetForce * Xdist);
         P->forceY += (gravNetForce * Ydist);
         return 0;
     }
 
-    distance = std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
-                                std::pow(P->yPos - Q->getValue()->centerOfMassY,2));
     if(((double)Q->getsX())/distance > this->calculationThreshold){
         for(int i = 0; i < 4; i++){
             this->calculateNetForce(P, Q->getQuads()[i]);
@@ -98,10 +157,10 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
         return 0;
     }else{
         quadNode* node = Q->getValue();
-        Xdist = P->xPos - node->centerOfMassX;
-        Ydist = P->yPos - node->centerOfMassY;
+        Xdist = (P->xPos - node->centerOfMassX);
+        Ydist = (P->yPos - node->centerOfMassY);
 
-        gravNetForce = (GRAV_CONST * P->mass * node->massOfChildren) / distance;
+        gravNetForce = -1*(GRAV_CONST * P->mass * node->massOfChildren) / distance;
 
         P->forceX += (gravNetForce * Xdist);
         P->forceY += (gravNetForce * Ydist);
@@ -115,9 +174,9 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
 
 double calculateMassOfChildren(quadtree<quadNode>* Q)
 {
-    printf("At %p\n", Q);
+//    printf("At %p\n", Q);
     if(!Q->isExternalNode()){
-        printf("getting child mass\n");
+//        printf("getting child mass\n");
         Q->getValue()->massOfChildren = 0.f;
         for(int i = 0; i < 4; i++){
             Q->getValue()->massOfChildren += calculateMassOfChildren(Q->getQuads()[i]);
@@ -126,7 +185,7 @@ double calculateMassOfChildren(quadtree<quadNode>* Q)
 
     }else{
         if(Q->getValue() != nullptr && Q->getValue()->particleNode != nullptr){
-            printf("Returning %f\n", Q->getValue()->particleNode->mass);
+//            printf("Returning %f\n", Q->getValue()->particleNode->mass);
             return Q->getValue()->particleNode->mass;
         }
         else{
@@ -158,8 +217,8 @@ double calculateCenterOfMassX(quadtree<quadNode>* Q)
         }
         Q->getValue()->centerOfMassX = Q->getValue()->centerOfMassX/Q->getValue()->massOfChildren;
         return Q->getValue()->centerOfMassX;
-
     }
+    return 0.f;
 }
 
 double calculateCenterOfMassY(quadtree<quadNode>* Q)
@@ -186,6 +245,7 @@ double calculateCenterOfMassY(quadtree<quadNode>* Q)
         Q->getValue()->centerOfMassY = Q->getValue()->centerOfMassY/Q->getValue()->massOfChildren;
         return Q->getValue()->centerOfMassY;
     }
+    return 0.f;
 }
 
 

@@ -35,7 +35,14 @@
 			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add option="-lmingw32 -lSDL2" />
+			<Add directory="../../SDL/include/SDL2" />
+			<Add directory="../../mingwSDL/include/SDL2" />
+			<Add directory="../../../../Program Files (x86)/CodeBlocks/MinGW/include" />
+		</Linker>
 		<Unit filename="include/nBody.h" />
+		<Unit filename="include/visualizer.h" />
 		<Unit filename="main.cpp">
 			<Option target="Release" />
 		</Unit>
@@ -43,6 +50,7 @@
 		<Unit filename="quadtree.cpp" />
 		<Unit filename="quadtree.h" />
 		<Unit filename="src/nBody.cpp" />
+		<Unit filename="src/visualizer.cpp" />
 		<Unit filename="test.c">
 			<Option compilerVar="CC" />
 		</Unit>
