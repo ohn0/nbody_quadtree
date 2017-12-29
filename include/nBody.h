@@ -21,6 +21,7 @@ struct particle{
     double forceY = 0.f;
 
     double mass = 0.f;
+    bool used = true;
 };
 
 #ifndef QUAD_NODE_STRUCT_H
@@ -30,6 +31,7 @@ struct quadNode
     double massOfChildren = 0.f;
     double centerOfMassX = 0.f;
     double centerOfMassY = 0.f;
+    bool used = true;
     particle* particleNode = nullptr;
 };
 #endif // QUAD_NODE_STRUCT_H

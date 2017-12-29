@@ -1,6 +1,7 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <cmath>
 #define NW 0
@@ -43,12 +44,6 @@ class quadtree
     private:
         quadtree<T>* findValidQuadrant(double, double);
         int subdivide();
-        /*
-        quad[0] = northwest quadrant;
-        quad[1] = northeast quadrant;
-        quad[2] = southwest quadrant;
-        quad[3] = southeast quadrant;
-        */
         quadtree<T>* quads[4];
 
 };
@@ -136,18 +131,19 @@ template <class T> int quadtree<T>::insertElement(T* element, double X, double Y
 
 //    printf("Inserting (%f, %f)\n", X, Y);
     if(this->value != nullptr && this->isExternal){
-        this->subdivide();
+        if(this->subdivide() < 0){
+            return -1;
+        }
         this->isExternal = false;
         quadtree<T>* validRootQuad = this->findValidQuadrant(this->X, this->Y);
         validRootQuad->insertElement(this->value, this->X, this->Y);
         this->value = new T;
         quadtree<T>* validQuad = this->findValidQuadrant(X, Y);
-        validQuad->insertElement(element, X, Y);
+        return validQuad->insertElement(element, X, Y);
         return 0;
     }else{
         if(!this->isExternal){
-            (this->findValidQuadrant(X, Y))->insertElement(element, X, Y);
-            return 0;
+            return (this->findValidQuadrant(X, Y))->insertElement(element, X, Y);
         }
         this->value = element;
         this->X = X;
@@ -166,6 +162,9 @@ template <class T> int quadtree<T>::subdivide()
 
     int halfSizeX = (int)std::ceil(this->sizeX/2.f);
     int halfSizeY = (int)std::ceil(this->sizeY/2.f);
+    if(halfSizeX == 1 && this->sizeX == 1){
+        return -1;
+    }
     this->quads[NW] = new quadtree<T>(this->startX , this->startY,
                                halfSizeX, halfSizeY);
     this->quads[NE] = new quadtree<T>(this->startX + halfSizeX, this->startY,
@@ -194,18 +193,11 @@ template <class T> quadtree<T>* quadtree<T>::findValidQuadrant(double X, double 
     }
 
     int i;
-//    printf("Finding a valid quadrant for (%f,%f)\n", X,Y);
     for(i = 0; i < 4; i++){
-//        printf("Start:(%d,%d)\nSize:(%d,%d)\n", this->quads[i]->startX,
-//               this->quads[i]->startY, this->quads[i]->sizeX, this->quads[i]->sizeY);
         if(this->quads[i]->startX <= X &&
           (this->quads[i]->startX + this->quads[i]->sizeX >= X) &&
            this->quads[i]->startY <= Y &&
           (this->quads[i]->startY + this->quads[i]->sizeY >= Y)){
-//                std::cout << "Found a valid quadrant starting at (" <<
-//                this->quads[i]->startX <<","<<this->quads[i]->startY <<") " <<
-//                "with size (" << this->quads[i]->sizeX <<"," << this->quads[i]->sizeY<<
-//                ") that will contain the point(" << X << "," << Y <<")"<< std::endl;
                 return this->quads[i];
            }
     }

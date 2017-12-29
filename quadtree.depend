@@ -3,8 +3,9 @@
 	"quadtree.h"
 	<iostream>
 
-1514490498 c:\users\neel\codeblocks\quadtree\quadtree.h
+1514582430 c:\users\neel\codeblocks\quadtree\quadtree.h
 	<iostream>
+	<fstream>
 	<cstdio>
 	<cmath>
 
@@ -13,22 +14,22 @@
 
 1512850213 source:c:\users\neel\codeblocks\quadtree\test.c
 
-1514506019 source:c:\users\neel\codeblocks\quadtree\quadtests.cpp
+1514582342 source:c:\users\neel\codeblocks\quadtree\quadtests.cpp
 	"quadtree.h"
 	"nBody.h"
 	"visualizer.h"
 	<iostream>
 
-1514498970 source:c:\users\neel\codeblocks\quadtree\src\nbody.cpp
+1514582333 source:c:\users\neel\codeblocks\quadtree\src\nbody.cpp
 	"../include/nBody.h"
 
-1514477960 c:\users\neel\codeblocks\quadtree\include\nbody.h
+1514574711 c:\users\neel\codeblocks\quadtree\include\nbody.h
 	<string>
 	<iostream>
 	<fstream>
 	"../quadtree.h"
 
-1514492460 source:c:\users\neel\codeblocks\quadtree\src\visualizer.cpp
+1514575845 source:c:\users\neel\codeblocks\quadtree\src\visualizer.cpp
 	"visualizer.h"
 
 1514421297 c:\users\neel\codeblocks\quadtree\include\visualizer.h

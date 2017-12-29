@@ -1,5 +1,5 @@
 #include "../include/nBody.h"
-#define DAMPENING 512.f
+#define SOFTENING 8.f
 nBody::nBody()
 {
     //ctor
@@ -32,8 +32,7 @@ nBody::nBody(std::string filename)
         this->particles = new particle[numParticles];
         this->quadNodes = new quadNode[numParticles];
         int i = 0;
-        while(!particleFile.eof()){
-    //        particles[i] = new particle;
+        while(i < numParticles){
             particleFile >> particles[i].xPos;
             particleFile >> particles[i].yPos;
 
@@ -68,12 +67,11 @@ int nBody::updateQuadTree()
            quadNodes[i].particleNode->yPos < fieldHeight){
             if(Qtree->insertElement(&quadNodes[i], quadNodes[i].particleNode->xPos,
                                 quadNodes[i].particleNode->yPos) == -1){
+                quadNodes[i].used = false;
+                particles[i].used = false;
                 printf("Problem encountered attempting to insert particle into quadtree.\n");
                 return -1;
             }
-       }else{
-//            printf("Unable to insert point (%d, %d), not in bounds.\n", quadNodes[i].particleNode->xPos,
-//                   quadNodes[i].particleNode->yPos);
        }
     }
     return 0;
@@ -83,7 +81,9 @@ int nBody::updateNetForce()
 {
     int retVal = 0;
     for(int i = 0; i < this->numParticles; i++){
-        retVal = this->calculateNetForce(&(this->particles[i]), (this->Qtree));
+        if(this->particles[i].used != false){
+            retVal = this->calculateNetForce(&(this->particles[i]), (this->Qtree));
+        }
         if(retVal == -1){
             printf("Error calculating net force.\n");
             return retVal;
@@ -96,9 +96,11 @@ int nBody::simulate(double timestep)
 {
     particle* particles = this->particles;
     for(int i = 0; i < this->getParticleNum(); i++){
-        this->updateAcceleration(&particles[i]);
-        this->updateVelocity(&particles[i], timestep);
-        this->updatePosition(&particles[i], timestep);
+        if(particles[i].used != false){
+            this->updateAcceleration(&particles[i]);
+            this->updateVelocity(&particles[i], timestep);
+            this->updatePosition(&particles[i], timestep);
+        }
     }
     return 0;
 }
@@ -132,29 +134,22 @@ int nBody::calculateNetForce(particle* P, quadtree<quadNode>* Q)
     }
 
     double distance, Xdist, Ydist, gravNetForce;
+    distance = std::pow((std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
+                 std::pow(P->yPos - Q->getValue()->centerOfMassY,2)) + SOFTENING), 1.5f);
     if(Q->isExternalNode()){
         if(Q->getValue()->particleNode->xPos == P->xPos &&
            Q->getValue()->particleNode->yPos == P->yPos){
-//            printf("Can't calculate force acting on same object.\n");
             return 0;
         }
-        distance = 0x5f3759df - ((int)(std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
-                     std::pow(P->yPos - Q->getValue()->centerOfMassY,2)) + DAMPENING) >> 1);
-//        printf("Distance value is %f\n", distance);
         particle* qParticle = Q->getValue()->particleNode;
         Xdist = (P->xPos - qParticle->xPos);
         Ydist = (P->yPos - qParticle->yPos);
         gravNetForce = -1*(GRAV_CONST * P->mass * qParticle->mass) / distance;
-//        printf("Gravitational net force is %.18f given pmass %.9f and qmass %.9f with Gforce %.9f.\n",
-//               gravNetForce, P->mass, qParticle->mass, GRAV_CONST);
         P->forceX += (gravNetForce * Xdist);
         P->forceY += (gravNetForce * Ydist);
-//        printf("Net Force: (%.20f, %.20f)\n", P->forceX, P->forceY);
         return 0;
     }
 
-        distance = 0x5f3759df - ((int)(std::sqrt(std::pow(P->xPos - Q->getValue()->centerOfMassX, 2) +
-                     std::pow(P->yPos - Q->getValue()->centerOfMassY,2)) + DAMPENING) >> 1);
     if(((double)Q->getsX())/distance > this->calculationThreshold){
         for(int i = 0; i < 4; i++){
             this->calculateNetForce(P, Q->getQuads()[i]);

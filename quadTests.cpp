@@ -355,13 +355,13 @@ bool smallerMassParticleMovesTowardGreaterMassParticle()
 
 bool simulationAnimationTest()
 {
-    nBody nSystem("qparticles");
+    nBody nSystem("qparticles1k");
     visualizer vis("v", 900,900);
-//    vis.toggleTreeView(true);
+    vis.toggleTreeView(true);
     quadtree<quadNode>* qTree;
     SDL_Event e;
     bool quit = false;
-    bool updateVisuals = false;
+    bool updateVisuals = true;
     printf("Ready.\n");
     while(!quit){
         while(SDL_PollEvent(&e)){
@@ -382,7 +382,7 @@ bool simulationAnimationTest()
             calculateCenterOfMassX(qTree);
             calculateCenterOfMassY(qTree);
             nSystem.updateNetForce();
-            nSystem.simulate(1);
+            nSystem.simulate(2);
             vis.updateVisuals(&nSystem);
             nSystem.updateQuadTree();
             particles = nSystem.getParticles();

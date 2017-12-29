@@ -49,15 +49,18 @@ int visualizer::updateVisuals(nBody* nSystem)
     double nWidth = nSystem->getFieldWidth();
     double nHeight = nSystem->getFieldHeight();
     for(int i = 0; i < nSystem->getParticleNum(); i++){
-        pX = ((double)particles[i].xPos / nWidth) * this->screenWidth;
-        pY = ((double)particles[i].yPos / nHeight) * this->screenHeight;
+        if(particles[i].used != false){
+            pX = ((double)particles[i].xPos / nWidth) * this->screenWidth;
+            pY = ((double)particles[i].yPos / nHeight) * this->screenHeight;
 
-//        printf("Drawing point at %d, %d\n", pX, pY);
-        if(pX >= 0 && pX <= this->screenWidth &&
-           pY >= 0 && pY <= this->screenHeight){
-            SDL_SetRenderDrawColor(this->visRenderer, 255, 255, 255, 255);
-            SDL_RenderDrawPoint(this->visRenderer, pX, pY);
-       }
+            //        printf("Drawing point at %d, %d\n", pX, pY);
+            if(pX >= 0 && pX <= this->screenWidth &&
+               pY >= 0 && pY <= this->screenHeight){
+                SDL_SetRenderDrawColor(this->visRenderer, 255, 255, 255, 255);
+                SDL_RenderDrawPoint(this->visRenderer, pX, pY);
+            }
+        }
+
     }
     SDL_RenderPresent(this->visRenderer);
 
@@ -72,7 +75,7 @@ int visualizer::updateVisualsShowTree(nBody* nSystem)
     std::vector<quadtree<quadNode>*> children;
     children.push_back(qTree);
     SDL_SetRenderDrawColor(this->visRenderer, 0,0,0,255);
-    SDL_SetRenderDrawColor(this->visRenderer, 255,255,255,255);
+    SDL_SetRenderDrawColor(this->visRenderer, 55,128,255,255);
     double nWidth = nSystem->getFieldWidth();
     double nHeight = nSystem->getFieldHeight();
 
